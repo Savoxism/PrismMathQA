@@ -1,0 +1,379 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>PrismMath Tutor</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/markdown-it@14.1.0/dist/markdown-it.min.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/dompurify@3.1.6/dist/purify.min.js"></script>
+  <style>
+    :root {
+      --ink: #172033;
+      --muted: #667085;
+      --line: #d8dee9;
+      --panel: #ffffff;
+      --band: #f5f7fb;
+      --accent: #0b6bcb;
+      --accent-2: #00a89d;
+      --tool: #8a4b00;
+      --rag: #245b3d;
+      --shadow: 0 18px 45px rgba(15, 27, 45, 0.08);
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: Inter, Segoe UI, Arial, sans-serif;
+      color: var(--ink);
+      background:
+        linear-gradient(135deg, rgba(11, 107, 203, 0.09), transparent 34%),
+        linear-gradient(315deg, rgba(0, 168, 157, 0.10), transparent 30%),
+        var(--band);
+    }
+    header {
+      padding: 20px 28px;
+      border-bottom: 1px solid var(--line);
+      background: #0f1b2d;
+      color: white;
+    }
+    header h1 { margin: 0; font-size: 22px; }
+    header p { margin: 4px 0 0; color: #c9d4e5; }
+    main {
+      display: grid;
+      grid-template-columns: 360px 1fr;
+      gap: 18px;
+      padding: 18px;
+      max-width: 1500px;
+      margin: 0 auto;
+    }
+    section, aside {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 16px;
+      box-shadow: var(--shadow);
+    }
+    label { display: block; font-size: 13px; color: var(--muted); margin: 12px 0 4px; }
+    input, textarea {
+      width: 100%;
+      border: 1px solid var(--line);
+      border-radius: 6px;
+      padding: 9px 10px;
+      font: inherit;
+    }
+    textarea { min-height: 92px; resize: vertical; }
+    button {
+      margin-top: 14px;
+      width: 100%;
+      border: 0;
+      border-radius: 6px;
+      padding: 10px 12px;
+      color: white;
+      background: linear-gradient(135deg, var(--accent), var(--accent-2));
+      font-weight: 700;
+      cursor: pointer;
+    }
+    .answer {
+      min-height: 180px;
+    }
+    .markdown {
+      line-height: 1.65;
+      overflow-wrap: anywhere;
+    }
+    .markdown[data-rendered="plain"] {
+      white-space: pre-wrap;
+    }
+    .markdown h1, .markdown h2, .markdown h3 {
+      margin: 22px 0 8px;
+      line-height: 1.25;
+    }
+    .markdown h1 { font-size: 26px; }
+    .markdown h2 { font-size: 22px; border-bottom: 1px solid var(--line); padding-bottom: 6px; }
+    .markdown h3 { font-size: 18px; color: #12345a; }
+    .markdown p { margin: 10px 0; }
+    .markdown ul, .markdown ol { padding-left: 24px; }
+    .markdown li { margin: 5px 0; }
+    .markdown table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 14px 0;
+      overflow: hidden;
+      border-radius: 6px;
+      border: 1px solid var(--line);
+    }
+    .markdown th {
+      background: #eef6ff;
+      color: #12345a;
+      text-align: left;
+    }
+    .markdown th, .markdown td {
+      border: 1px solid var(--line);
+      padding: 9px 10px;
+      vertical-align: top;
+    }
+    .markdown blockquote {
+      margin: 14px 0;
+      padding: 8px 14px;
+      border-left: 4px solid var(--accent);
+      background: #f3f8ff;
+      color: #24344d;
+    }
+    .markdown pre {
+      padding: 12px;
+      background: #0f1b2d;
+      color: #e6edf7;
+      border-radius: 6px;
+      overflow-x: auto;
+    }
+    .markdown code {
+      background: #eef2f7;
+      padding: 1px 4px;
+      border-radius: 4px;
+    }
+    .markdown pre code {
+      background: transparent;
+      padding: 0;
+    }
+    .markdown .katex-display {
+      overflow-x: auto;
+      overflow-y: hidden;
+      padding: 4px 0;
+    }
+    .grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 18px;
+      margin-top: 18px;
+    }
+    .example {
+      border-left: 4px solid var(--rag);
+      padding: 10px 12px;
+      margin: 10px 0;
+      background: #f4fbf7;
+      border-radius: 4px;
+    }
+    .tool {
+      border-left: 4px solid var(--tool);
+      padding: 10px 12px;
+      margin: 10px 0;
+      background: #fff8ee;
+      border-radius: 4px;
+      white-space: pre-wrap;
+      overflow-wrap: anywhere;
+    }
+    .meta { color: var(--muted); font-size: 13px; }
+    .error { color: #b42318; font-weight: 700; }
+    code { background: #eef2f7; padding: 1px 4px; border-radius: 4px; }
+    .tool pre {
+      margin: 6px 0 0;
+      white-space: pre-wrap;
+      font-size: 13px;
+    }
+    .placeholder {
+      color: var(--muted);
+      border: 1px dashed var(--line);
+      border-radius: 8px;
+      padding: 18px;
+      background: #fafcff;
+    }
+    @media (max-width: 900px) {
+      main, .grid { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>PrismMath Tutor</h1>
+    <p>LaTeX-rendered math tutor demo with first-turn RAG, student memory, and calculator tool reporting.</p>
+  </header>
+  <main>
+    <aside>
+      <form method="post" action="/chat">
+        <input type="hidden" name="turn_index" value="{{ turn_index }}">
+        <label>Student ID</label>
+        <input name="student_id" value="{{ student_id }}">
+        <label>Nickname</label>
+        <input name="nickname" value="{{ nickname }}">
+        <label>Grade</label>
+        <input name="grade" value="{{ grade }}">
+        <label>Weak areas</label>
+        <input name="weak_areas" value="{{ weak_areas }}">
+        <label>Strong areas</label>
+        <input name="strong_areas" value="{{ strong_areas }}">
+        <label>Preferred explaining style</label>
+        <input name="preferred_style" value="{{ preferred_style }}">
+        <label>Question</label>
+        <textarea name="question" placeholder="Example: Verify the exact solution of \(987654321x - 123456789 = 555555555\), and compute \(x\) as a simplified fraction."></textarea>
+        <button type="submit">Ask Tutor</button>
+      </form>
+      <p class="meta">Turn: {{ turn_index }}. RAG retrieval runs only on turn 1 of this browser session.</p>
+      {% if log_path %}<p class="meta">Log: <code>{{ log_path }}</code></p>{% endif %}
+      {% if error %}<p class="error">{{ error }}</p>{% endif %}
+    </aside>
+
+    <section>
+      <h2>Model Answer</h2>
+      {% if answer %}
+        <template class="markdown-source">{{ answer }}</template>
+        <div class="answer markdown" data-rendered="plain">{{ answer }}</div>
+      {% else %}
+        <div class="placeholder">Ask a question to see the model answer here. LaTeX such as \(x=4\) and \[a^2+b^2=c^2\] will render automatically.</div>
+      {% endif %}
+
+      <div class="grid">
+        <section>
+          <h3>Tool Used</h3>
+          {% if tool_calls %}
+            {% for call in tool_calls %}
+              <div class="tool">
+                <div class="meta">action: <b>{{ call.get("action") }}</b></div>
+                <pre>args: {{ call.get("args") }}
+result: {{ call.get("result") }}</pre>
+              </div>
+            {% endfor %}
+          {% else %}
+            <p class="meta">No tool call was used for this turn.</p>
+          {% endif %}
+        </section>
+
+        <section>
+          <h3>Top-3 ICL Examples</h3>
+          {% if examples %}
+            {% for ex in examples %}
+              <div class="example">
+                <div class="meta">#{{ loop.index }} | {{ ex.example_id }} | similarity {{ "%.4f"|format(ex.score) }}</div>
+                <p><b>Question:</b> {{ ex.question }}</p>
+                <p><b>Answer:</b></p>
+                <template class="markdown-source">{{ ex.answer }}</template>
+                <div class="markdown" data-rendered="plain">{{ ex.answer }}</div>
+              </div>
+            {% endfor %}
+          {% else %}
+            <p class="meta">No ICL examples for this turn. They are shown only for the first retrieved question.</p>
+          {% endif %}
+        </section>
+      </div>
+    </section>
+  </main>
+  <script>
+    window.addEventListener("DOMContentLoaded", () => {
+      const mathDelimiters = [
+        {left: "$$", right: "$$", display: true},
+        {left: "\\[", right: "\\]", display: true},
+        {left: "\\(", right: "\\)", display: false},
+        {left: "$", right: "$", display: false}
+      ];
+      const hasMarkdown = Boolean(window.markdownit && window.DOMPurify);
+      const md = hasMarkdown ? window.markdownit({
+        html: false,
+        linkify: true,
+        typographer: true,
+        breaks: false
+      }) : null;
+
+      const isEscaped = (text, index) => {
+        let slashCount = 0;
+        for (let i = index - 1; i >= 0 && text[i] === "\\"; i--) {
+          slashCount += 1;
+        }
+        return slashCount % 2 === 1;
+      };
+
+      const findDelimiter = (text, delimiter, start) => {
+        let index = start;
+        while ((index = text.indexOf(delimiter, index)) !== -1) {
+          if (!isEscaped(text, index)) return index;
+          index += delimiter.length;
+        }
+        return -1;
+      };
+
+      const escapeHtml = (text) => text
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;")
+        .replaceAll('"', "&quot;")
+        .replaceAll("'", "&#39;");
+
+      const protectMath = (raw) => {
+        const segments = [];
+        let protectedText = "";
+        let index = 0;
+
+        const pushSegment = (end, closeLength) => {
+          const token = `@@PRISMMATH${segments.length}@@`;
+          segments.push(raw.slice(index, end + closeLength));
+          protectedText += token;
+          index = end + closeLength;
+        };
+
+        while (index < raw.length) {
+          if (raw.startsWith("\\[", index)) {
+            const end = findDelimiter(raw, "\\]", index + 2);
+            if (end !== -1) {
+              pushSegment(end, 2);
+              continue;
+            }
+          }
+          if (raw.startsWith("\\(", index)) {
+            const end = findDelimiter(raw, "\\)", index + 2);
+            if (end !== -1) {
+              pushSegment(end, 2);
+              continue;
+            }
+          }
+          if (raw.startsWith("$$", index)) {
+            const end = findDelimiter(raw, "$$", index + 2);
+            if (end !== -1) {
+              pushSegment(end, 2);
+              continue;
+            }
+          }
+          if (raw[index] === "$" && !isEscaped(raw, index) && raw[index + 1] !== "$" && raw[index + 1] && !/\s/.test(raw[index + 1])) {
+            const end = findDelimiter(raw, "$", index + 1);
+            if (end !== -1 && raw[end - 1] && !/\s/.test(raw[end - 1])) {
+              pushSegment(end, 1);
+              continue;
+            }
+          }
+          protectedText += raw[index];
+          index += 1;
+        }
+
+        return { protectedText, segments };
+      };
+
+      const restoreMath = (html, segments) => {
+        let restored = html;
+        segments.forEach((segment, index) => {
+          restored = restored.replaceAll(`@@PRISMMATH${index}@@`, escapeHtml(segment));
+        });
+        return restored;
+      };
+
+      document.querySelectorAll(".markdown-source").forEach((source) => {
+        const target = source.nextElementSibling;
+        if (!target || !target.classList.contains("markdown")) return;
+        const raw = (source.content ? source.content.textContent : source.textContent).trim();
+        if (!hasMarkdown) {
+          target.textContent = raw;
+          target.dataset.rendered = "plain";
+          return;
+        }
+        const { protectedText, segments } = protectMath(raw);
+        const rendered = window.DOMPurify.sanitize(md.render(protectedText));
+        target.innerHTML = restoreMath(rendered, segments);
+        target.dataset.rendered = "html";
+      });
+      if (window.renderMathInElement) {
+        renderMathInElement(document.body, {
+          delimiters: mathDelimiters,
+          throwOnError: false
+        });
+      }
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,41 @@
+\documentclass{article}
+
+\usepackage[preprint]{neurips_2026}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{hyperref}
+\usepackage{url}
+\usepackage{booktabs}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{graphicx}
+\usepackage{xcolor}
+\usepackage{microtype}
+
+\title{PrismMath Tutor: Agentic Retrieval-Augmented Math Tutoring with Local Student Memory and Multi-Context Self-Distillation}
+
+\author{
+  Anonymous Author(s) \\
+  NLP Capstone Project \\
+  \texttt{your.email@example.com}
+}
+
+\begin{document}
+
+\maketitle
+
+\begin{abstract}
+PrismMath Tutor is an agentic mathematics tutoring system that combines retrieval-augmented generation, persistent student memory, and symbolic verification to make language-model tutoring more grounded, adaptive, and auditable. The deployed prototype exposes both a command-line interface and a FastAPI web interface. For each student, the system stores a profile and recent interactions in SQLite, retrieves similar MetaMathQA examples from a local Chroma index on the first turn, prompts an OpenAI-compatible language model with the retrieved examples and student context, and delegates exact symbolic computation to a SymPy-backed verifier when arithmetic or algebraic precision is important. This report documents the framework and positions Adaptive-View Self-Distillation (AVSD) as the finetuning method for training the reasoning model that powers the tutor. AVSD treats full solutions, partial rationales, and final answers as multiple privileged teacher views, then reconstructs token-level supervision by separating cross-view consensus from gated view-specific residual information. We reproduce the AVSD benchmark results on AIME24, AIME25, HMMT25, Codeforces, and LiveCodeBench, where AVSD improves over SFT, GRPO, and single-view on-policy self-distillation. Finally, we describe the PrismMath demonstration workflow, its current engineering limitations, and future work required to integrate a locally fine-tuned AVSD checkpoint into the full tutoring loop.
+\end{abstract}
+
+\input{sections/01_introduction}
+\input{sections/02_related_work}
+\input{sections/03_method}
+\input{sections/04_experiments}
+\input{sections/05_results}
+\input{sections/06_conclusion}
+
+\bibliographystyle{plainnat}
+\bibliography{references}
+
+\end{document}

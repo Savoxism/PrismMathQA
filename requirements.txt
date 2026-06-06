@@ -1,0 +1,18 @@
+--extra-index-url https://download.pytorch.org/whl/cu128
+torch
+accelerate
+chromadb
+fastapi
+langchain
+langgraph
+langgraph-checkpoint-sqlite
+numpy
+openai
+pydantic
+pytest
+python-dotenv
+python-multipart
+sentence-transformers
+sympy
+transformers
+uvicorn

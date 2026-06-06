@@ -1,27 +1,27 @@
-"""Simple LLM inference helper."""
+"""Simple LLM inference helpers."""
 
 from openai import OpenAI
 
-from config import settings
+from utils.config import settings
 
-def inference(
-    prompt: str,
-    system_prompt: str | None = None,
-    temperature: float = 0.0,
-    max_tokens: int = 128,
-    verbose: bool = False,
-) -> str | dict[str, str | None]:
-    client = OpenAI(
+Message = dict[str, str]
+
+
+def _client() -> OpenAI:
+    return OpenAI(
         api_key=settings.llm_api_key,
-        base_url=settings.llm_base_url
+        base_url=settings.llm_base_url,
     )
 
-    messages = []
-    if system_prompt:
-        messages.append({"role": "system", "content": system_prompt})
-    messages.append({"role": "user", "content": prompt})
 
-    response = client.chat.completions.create(
+def chat_completion(
+    messages: list[Message],
+    temperature: float = 0.0,
+    max_tokens: int = 4096,
+    verbose: bool = False,
+) -> str | dict[str, str | None]:
+    
+    response = _client().chat.completions.create(
         model=settings.llm_model,
         messages=messages,
         temperature=temperature,
@@ -45,3 +45,23 @@ def inference(
         }
 
     return content
+
+
+def inference(
+    prompt: str,
+    system_prompt: str | None = None,
+    temperature: float = 0.0,
+    max_tokens: int = 4096,
+    verbose: bool = False,
+) -> str | dict[str, str | None]:
+    messages: list[Message] = []
+    if system_prompt:
+        messages.append({"role": "system", "content": system_prompt})
+    messages.append({"role": "user", "content": prompt})
+
+    return chat_completion(
+        messages,
+        temperature=temperature,
+        max_tokens=max_tokens,
+        verbose=verbose,
+    )

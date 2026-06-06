@@ -1,0 +1,104 @@
+\section{Demonstration}
+
+The PrismMath demonstration shows how the implemented system connects model reasoning to retrieval, memory, and tool verification. The demo can be run either through the command line or the web interface. Both modes use the same chat core, so qualitative behavior is consistent across interfaces. This section describes the expected workflow and representative examples from the repository's \texttt{demo\_questions.md}.
+
+\subsection{Local Setup}
+
+The project is designed to run inside its local virtual environment. The README specifies the use of \texttt{.\textbackslash.venv\textbackslash Scripts\textbackslash python.exe} for package installation and execution. The expected local artifacts are:
+\[
+\begin{array}{ll}
+\text{Corpus} & \texttt{data/processed/metamathqa\_30k.jsonl},\\
+\text{Embedding model} & \texttt{models/qwen3-embedding-4b/},\\
+\text{Environment file} & \texttt{.env}.
+\end{array}
+\]
+The environment file supplies \texttt{LLM\_API\_KEY} and \texttt{LLM\_BASE\_URL} for an OpenAI-compatible endpoint. The RAG index is built with
+\[
+\texttt{python -m app.rag.ingest --reset --batch-size 2},
+\]
+using the project interpreter. If GPU memory is limited, the batch size can be reduced to one. The web interface is launched with Uvicorn and serves the FastAPI app at \texttt{http://127.0.0.1:8080}. The CLI demo is launched by running \texttt{main.py}.
+
+\subsection{End-to-end Turn Flow}
+
+A single PrismMath turn proceeds through a fixed sequence. First, the student id is normalized and a profile is created or updated. The profile includes grade, weak areas, strong areas, and preferred explanation style. Second, the system retrieves recent interactions for that student from SQLite. Third, if the current turn is the first turn in the session, the retriever loads the Chroma collection, embeds the question, and selects the top three MetaMathQA examples. Fourth, the prompt builder concatenates the student profile, recent history, retrieved examples, and current question.
+
+The LLM then receives a system prompt that defines the tutor role and the tool-use protocol. The model can answer directly, or it can emit a fenced JSON tool request. If a valid tool request is found, the runtime dispatches it to the SymPy verifier, records the result, and asks the model for a final answer conditioned on the tool output. Finally, the system stores the interaction, retrieved example ids, and tool calls in SQLite, and the session logger writes a human-readable log file under \texttt{logs/}.
+
+The web interface makes the agentic components visible. It displays the model answer, the tool call if one was used, the top retrieved in-context examples for the first turn, the current turn number, and the log path. It also renders Markdown and LaTeX through client-side libraries, making mathematical explanations readable in the browser.
+
+\subsection{RAG-oriented Questions}
+
+Two repository demo questions are drawn from hard examples in the sampled MetaMathQA corpus. One asks about a parametric curve
+\[
+    (x,y)=(2\cos t-\sin t, X\sin t)
+\]
+whose graph can be expressed as
+\[
+    ax^2+bxy+cy^2=1,
+\]
+with $X=64$. The expected ordered triple is
+\[
+    (a,b,c)=\left(\frac{1}{4},\frac{1}{128},\frac{5}{16384}\right).
+\]
+This example stresses symbolic manipulation and pattern matching to a known style of algebraic solution. When asked as a first turn, PrismMath should retrieve similar MetaMathQA-style examples and expose them as in-context demonstrations. The retrieved examples guide the answer style, while the model still needs to solve the exact current instance.
+
+Another hard question describes a hexagon formed by joining
+\[
+(0,1),(1,2),(2,2),(2,1),(3,1),(2,0),(0,1)
+\]
+and asks for $a+b+c$ when the perimeter is written as $a+b\sqrt{2}+c\sqrt{5}$. The expected result is
+\[
+    3+2\sqrt{2}+\sqrt{5},
+\]
+so $a+b+c=6$. This type of problem benefits from retrieved examples because the solution combines geometry, distance computation, and expression parsing. RAG helps the model remain in the style of contest math explanations, while the final answer remains tied to the actual coordinates in the prompt.
+
+\subsection{Tool-oriented Questions}
+
+The repository includes a tool-needed equation:
+\[
+    987654321x - 123456789 = 555555555.
+\]
+The expected exact solution is obtained by adding $123456789$ to both sides:
+\[
+    987654321x=679012344,
+\]
+so
+\[
+    x=\frac{679012344}{987654321}
+    =\frac{75445816}{109739369}.
+\]
+This question is useful because the reasoning is simple but the arithmetic is large enough that a language model may make a transcription or reduction error. PrismMath's prompt instructs the model to use \texttt{verify\_answer} for exact verification, large arithmetic, nontrivial fractions, or equation solving. A clean tool request would use a mathematical string such as
+\[
+\texttt{987654321*x - 123456789 = 555555555}
+\]
+with an empty expected answer if the model only wants the solver result. The final answer should then explain the algebra to the student rather than merely print the tool's dictionary.
+
+Additional demo questions cover a quadratic equation,
+\[
+    2x^2-7x+3=0,
+\]
+whose solutions are $x=1/2$ and $x=3$, and a vertex-form question for
+\[
+    f(x)=x^2-4x+1=(x-2)^2-3.
+\]
+These are medium grade 10--12 questions that should usually be answered directly. They test whether the tutor can explain standard procedures step by step without unnecessary tool calls. The distinction matters: an effective agent should not call a symbolic verifier for every simple task, because unnecessary tool use can slow the interaction and make the explanation feel mechanical.
+
+The demo also includes derivative and large-arithmetic variants. For
+\[
+    g(x)=7x^5-3x^2+11,
+\]
+the derivative is
+\[
+    g'(x)=35x^4-6x.
+\]
+For a rectangular field with dimensions $123456$ and $789012$, the exact area is
+\[
+    123456\cdot 789012=97408265472.
+\]
+These examples test the boundary between direct reasoning and tool-assisted computation. The derivative can be computed by rule, but the system prompt permits verification for symbolic differentiation. The large multiplication should trigger tool use because exact arithmetic is the central task.
+
+\subsection{Observed System Properties}
+
+The implemented system has several desirable properties for a capstone demo. It is inspectable: retrieved examples and tool calls are surfaced in the UI and stored in logs. It is modular: the LLM client, prompt builder, memory store, retriever, and verifier are separate modules. It is reproducible under local paths: the corpus, Chroma index, SQLite state, logs, and embedding model have explicit locations. It also has clear privacy boundaries for demo data, with README commands for deleting a single student's details or all local user details.
+
+The system also has clear limitations. RAG is first-turn-only in the current session policy. The symbolic verifier accepts only a constrained mathematical input format and does not parse natural-language problem statements. The active memory path uses recent interactions but does not yet maintain a robust mastery model. Finally, the local repository does not contain a trained AVSD checkpoint or an automated benchmark harness for the PrismMath tutor itself. These limitations are acceptable for the present demonstration, but they define the next engineering steps.
