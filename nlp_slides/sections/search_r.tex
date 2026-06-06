@@ -1,0 +1,102 @@
+\section{SEARCH-R}
+
+\begin{frame}{SEARCH-R: Metadata}
+\small
+\textbf{SEARCH-R: Structured Entity-Aware Retrieval with Chain-of-Reasoning Navigator for Multi-hop QA}
+
+\paperinfo
+{Findings of ACL 2026}
+{Dense retrieval plus entity informativeness; ablation mentions \texttt{sentence-transformers/all-*}; NER with \texttt{flair/ner-english-large}}
+{Fine-tuned Llama-3.1-8B decomposer; answer generators: Llama-3.1-8B, DeepSeek-V3, GPT-4o-mini; GPT-4o used in analysis}
+{Multi-hop question answering on MuSiQue, HotpotQA, and 2WikiMultiHopQA}
+
+\begin{block}{Key insights / contributions}
+\scriptsize
+\begin{itemize}
+  \item Trains an optimized chain-of-reasoning navigator for multi-hop question decomposition.
+  \item Combines dense retrieval with entity-aware informativeness scoring from document structure.
+  \item Provides more precise multi-document evidence for complex MHQA reasoning.
+\end{itemize}
+\end{block}
+\end{frame}
+
+\begin{frame}{SEARCH-R: Problem and Failure Mode}
+\scriptsize
+\begin{columns}[T,onlytextwidth]
+  \begin{column}{0.48\textwidth}
+    \begin{block}{Problem}
+      MHQA needs two things at once: a good reasoning path and useful evidence for each hop.
+    \end{block}
+    \begin{block}{Why prompt-only decomposition fails}
+      Large LLMs can generate stochastic or low-utility sub-questions; some paths are logically plausible but do not lead to answerable retrieval.
+    \end{block}
+  \end{column}
+  \begin{column}{0.48\textwidth}
+    \begin{block}{Why similarity retrieval fails}
+      Dense retrieval may return semantically similar but homogeneous or uninformative documents.
+    \end{block}
+    \begin{block}{Method response}
+      SEARCH-R trains a smaller decomposer using answer-consistency signals and ranks documents using entity informativeness from dependency parse trees.
+    \end{block}
+  \end{column}
+\end{columns}
+\end{frame}
+
+\pipelineframe{SEARCH-R}{images/search_r_pipeline.png}{0.98}
+
+\begin{frame}{SEARCH-R: Algorithm Deep Dive}
+\scriptsize
+\begin{enumerate}
+  \item \textbf{Train the navigator:} collect reasoning-path data from strong LLM outputs, filter by answer consistency, then SFT and PPO tune Llama-3.1-8B.
+  \item \textbf{Prepare retrieval features:} chunk the corpus, run NER, compute dense embeddings, and compute document entity informativeness from dependency parses.
+  \item \textbf{Decompose online:} generate a chain of sub-questions that should expose intermediate entities.
+  \item \textbf{Dual retrieval:} retrieve candidates by dense similarity and by entity-aware quantitative information retrieval.
+  \item \textbf{Iterative answering:} answer each sub-question, rewrite later sub-questions using previous sub-answers, then synthesize the final response.
+\end{enumerate}
+\begin{block}{Core intuition}
+SEARCH-R improves both the retrieval plan and the evidence scorer: better sub-questions define what to search for, while entity informativeness filters useful evidence.
+\end{block}
+\end{frame}
+
+\begin{frame}{SEARCH-R: Concrete Example}
+\scriptsize
+\begin{columns}[T,onlytextwidth]
+  \begin{column}{0.48\textwidth}
+    \begin{block}{Question}
+      What is the experimental satellite that was a forerunner to a communication satellite made by INSAT-4CR's manufacturer?
+    \end{block}
+    \begin{block}{Reasoning chain}
+      \textbf{Step 1:} identify INSAT-4CR's manufacturer.\\
+      \textbf{Step 2:} find the manufacturer's communication satellite.\\
+      \textbf{Step 3:} retrieve the experimental satellite that preceded it.
+    \end{block}
+  \end{column}
+  \begin{column}{0.48\textwidth}
+    \begin{block}{Entity-aware retrieval}
+      Dense retrieval asks "which chunk is similar?" SEARCH-R also asks "which entity in this document contributes useful information to the sub-question?"
+    \end{block}
+  \end{column}
+\end{columns}
+\end{frame}
+
+\begin{frame}{SEARCH-R: Main Results}
+\tiny
+\begin{block}{GPT-4o-mini answer generator: F1 comparison}
+\centering
+\resizebox{0.95\linewidth}{!}{
+\begin{tabular}{lccc}
+\toprule
+Method & MuSiQue & HotpotQA & 2Wiki \\
+\midrule
+NaiveRAG & 29.82 & 56.92 & 50.61 \\
+Iter-RetGen & 38.41 & 57.77 & 58.43 \\
+HippoRAG & 46.50 & 56.12 & 62.38 \\
+ChainRAG & 50.54 & 59.13 & 56.61 \\
+SEARCH-R & \textbf{55.68} & \textbf{60.06} & \textbf{63.86} \\
+\bottomrule
+\end{tabular}
+}
+\end{block}
+\vspace{0.1cm}
+\textbf{Ablation:} on MuSiQue, removing quantitative informativeness retrieval drops F1 from 55.68 to 48.78.
+\end{frame}

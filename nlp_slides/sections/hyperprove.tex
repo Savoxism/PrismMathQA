@@ -1,0 +1,107 @@
+\section{HyperProve}
+
+\begin{frame}{HyperProve: Metadata}
+\small
+\textbf{HyperProve: Answer-Guided Hypergraph Expansion for Multi-Hop Question Answering}
+
+\paperinfo
+{Anonymous EMNLP submission in provided PDF; acceptance not verified}
+{BGE-M3 retriever; synonym-aware entity embeddings with threshold $\eta=0.8$}
+{GPT-OSS-20B as backbone LLM in experiments}
+{Answer-guided hyperedge retrieval for MuSiQue, HotpotQA, and 2WikiMultiHopQA}
+
+\begin{block}{Key insights / contributions}
+\scriptsize
+\begin{itemize}
+  \item Introduces answer-conditioned hyperedge retrieval that carries intermediate answers across hops.
+  \item Expands locally over atomic-fact hyperedges using both structural connectivity and rewritten sub-query relevance.
+  \item Maintains supporting evidence as the cross-hop retrieval frontier for grounded multi-hop QA.
+\end{itemize}
+\end{block}
+\end{frame}
+
+\begin{frame}{HyperProve: Problem and Failure Mode}
+\scriptsize
+\begin{columns}[T,onlytextwidth]
+  \begin{column}{0.48\textwidth}
+    \begin{block}{Problem}
+      Multi-hop retrieval often needs a bridge entity that is invisible in the original question but becomes clear after an earlier hop.
+    \end{block}
+    \begin{block}{Why dense retrieval fails}
+      Independent passage matching retrieves locally similar text but has no persistent evidence state once a bridge entity is resolved.
+    \end{block}
+  \end{column}
+  \begin{column}{0.48\textwidth}
+    \begin{block}{Why prior structured / iterative methods fail}
+      Static graphs are not conditioned on intermediate answers; text-only iterative state can drift away from the supporting fact chain.
+    \end{block}
+    \begin{block}{Method response}
+      HyperProve carries each intermediate answer plus its supporting atomic-fact hyperedges as the next structural frontier.
+    \end{block}
+  \end{column}
+\end{columns}
+\end{frame}
+
+\pipelineframe{HyperProve}{images/hyperprove_pipeline.png}{0.92}
+
+\begin{frame}{HyperProve: Algorithm Deep Dive}
+\scriptsize
+\begin{enumerate}
+  \item \textbf{Atomic-fact hypergraph:} extract entities and decompose passages into facts; each fact becomes a hyperedge connected to entities and source passage.
+  \item \textbf{Synonym expansion:} link entity variants using embedding similarity so aliases can share retrieval mass.
+  \item \textbf{Question decomposition:} split the original question into dependent sub-queries.
+  \item \textbf{First-hop seeding:} retrieve dense seed hyperedges for the first sub-query.
+  \item \textbf{Answer-conditioned expansion:} for later hops, rewrite the sub-query using prior answers and expand locally from the carried hyperedge frontier.
+  \item \textbf{Verification and fallback:} integrate sub-answers when all hops are answered; otherwise fall back to an LLM reader over top passages.
+\end{enumerate}
+\begin{block}{Core intuition}
+HyperProve combines structured retrieval with iterative state: the state is not just text, but answer plus supporting atomic facts.
+\end{block}
+\end{frame}
+
+\begin{frame}{HyperProve: Concrete Example}
+\scriptsize
+\begin{columns}[T,onlytextwidth]
+  \begin{column}{0.48\textwidth}
+    \begin{block}{Question}
+      When was the start of the battle of the birthplace of the performer of III?
+    \end{block}
+    \begin{block}{Hidden bridge chain}
+      \textbf{fact 1:} III is by Stanton Moore.\\
+      \textbf{fact 2:} Stanton Moore was born in New Orleans.\\
+      \textbf{fact 3:} The Battle of New Orleans started on a specific date.
+    \end{block}
+  \end{column}
+  \begin{column}{0.48\textwidth}
+    \begin{block}{Answer-guided frontier}
+      Each intermediate answer becomes a bridge entity:
+      \[
+      \text{III} \rightarrow \text{Stanton Moore} \rightarrow \text{New Orleans} \rightarrow \text{battle date}
+      \]
+      The carried hyperedges prevent later retrieval from restarting at surface terms.
+    \end{block}
+  \end{column}
+\end{columns}
+\end{frame}
+
+\begin{frame}{HyperProve: Main Results}
+\scriptsize
+\begin{block}{Main results on multi-hop QA benchmarks}
+\centering
+\resizebox{0.96\linewidth}{!}{
+\begin{tabular}{lcccccc}
+\toprule
+Method & MuSiQue Acc. & MuSiQue F1 & Hotpot Acc. & Hotpot F1 & 2Wiki Acc. & 2Wiki F1 \\
+\midrule
+BGE-M3 & 51.50 & 39.70 & 68.12 & 61.80 & 72.18 & 54.50 \\
+HopRAG & 67.18 & 54.90 & 85.51 & 68.26 & 86.66 & 76.06 \\
+ChainRAG & 60.01 & 54.15 & 85.46 & 74.66 & 82.48 & 74.39 \\
+HyperProve & \textbf{71.60} & \textbf{59.23} & \textbf{91.30} & \textbf{76.64} & \textbf{91.40} & \textbf{80.01} \\
+\bottomrule
+\end{tabular}
+}
+\end{block}
+\begin{block}{Ablation takeaway}
+On MuSiQue, removing bridge entities drops accuracy from 71.60 to 64.50; removing decomposition drops it to 51.28, showing that stateful decomposition and answer-guided frontier both matter.
+\end{block}
+\end{frame}

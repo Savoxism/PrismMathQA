@@ -1,0 +1,108 @@
+\section{ChainRAG}
+
+\begin{frame}{ChainRAG: Metadata}
+\small
+\textbf{ChainRAG: Mitigating Lost-in-Retrieval Problems in Retrieval Augmented Multi-hop QA}
+
+\paperinfo
+{ACL 2025 long paper: Proceedings of ACL 2025}
+{OpenAI \texttt{text-embedding-3-small}; BGE-Reranker cross-encoder}
+{GPT-4o-mini, Qwen2.5-72B, and GLM-4-Plus}
+{Progressive retrieval and rewriting for multi-hop QA}
+
+\begin{block}{Key insights / contributions}
+\scriptsize
+\begin{itemize}
+  \item Formalizes ``lost-in-retrieval'', where missing entities in sub-questions break multi-hop retrieval.
+  \item Uses progressive sentence-graph retrieval plus sub-question rewriting to recover missing bridge entities.
+  \item Improves effectiveness and efficiency across multiple MHQA datasets and reader LLMs.
+\end{itemize}
+\end{block}
+\end{frame}
+
+\begin{frame}{ChainRAG: Problem and Failure Mode}
+\scriptsize
+\begin{columns}[T,onlytextwidth]
+  \begin{column}{0.48\textwidth}
+    \begin{block}{Problem}
+      Question decomposition helps MHQA, but later sub-questions often contain pronouns or vague references.
+    \end{block}
+    \begin{block}{Empirical failure}
+      The paper reports that the second sub-question has much lower Recall@2 than the first one, with an average decrease of 18.29\% across three datasets.
+    \end{block}
+  \end{column}
+  \begin{column}{0.48\textwidth}
+    \begin{block}{Why existing RAG fails}
+      Naive decomposition retrieves with "this author" or "this place" instead of the resolved entity, so retrieval follows a wrong branch.
+    \end{block}
+    \begin{block}{Method response}
+      ChainRAG answers each hop, rewrites the next sub-question with the recovered entity, and retrieves over a sentence graph.
+    \end{block}
+  \end{column}
+\end{columns}
+\end{frame}
+
+\pipelineframe{ChainRAG}{images/chain_rag_pipeline.png}{0.98}
+
+\begin{frame}{ChainRAG: Algorithm Deep Dive}
+\scriptsize
+\begin{enumerate}
+  \item \textbf{Sentence graph construction:} split documents into sentences and create nodes; add edges for shared entities, semantic similarity, and sentence adjacency.
+  \item \textbf{Question decomposition:} use the LLM to produce ordered sub-questions.
+  \item \textbf{Seed retrieval:} retrieve candidate sentences for the current sub-question with embedding similarity and reranking.
+  \item \textbf{Graph expansion:} expand from seed sentences to neighboring sentences so missing entity context can be recovered.
+  \item \textbf{Answer and rewrite:} answer the current sub-question; if a later sub-question contains vague references, replace them with the recovered entity/answer.
+  \item \textbf{Integration:} combine sub-answers or retrieved sub-contexts to answer the original question.
+\end{enumerate}
+\begin{block}{Core intuition}
+ChainRAG treats multi-hop QA as a stateful chain: each answer repairs the next retrieval query before the system searches again.
+\end{block}
+\end{frame}
+
+\begin{frame}{ChainRAG: Concrete Example}
+\scriptsize
+\begin{columns}[T,onlytextwidth]
+  \begin{column}{0.48\textwidth}
+    \begin{block}{Question}
+      What was the hometown of the author of the novel about a male roe deer's life?
+    \end{block}
+    \begin{block}{Lost-in-retrieval}
+      \textbf{Q1:} Who wrote the novel? $\rightarrow$ Felix Salten.\\
+      \textbf{Bad Q2:} What was the home city of this author?\\
+      The phrase ``this author'' loses the key entity.
+    \end{block}
+  \end{column}
+  \begin{column}{0.48\textwidth}
+    \begin{block}{ChainRAG repair}
+      Rewrite the second query:
+      \[
+      \text{What was the home city of Felix Salten?}
+      \]
+      Retrieval now targets the correct entity instead of an unrelated author.
+    \end{block}
+  \end{column}
+\end{columns}
+\end{frame}
+
+\begin{frame}{ChainRAG: Main Results}
+\scriptsize
+\begin{block}{Best F1 among ChainRAG variants in Table 1}
+\centering
+\resizebox{0.95\linewidth}{!}{
+\begin{tabular}{lccc}
+\toprule
+LLM / Method & MuSiQue & 2Wiki & HotpotQA \\
+\midrule
+GPT4o-mini best baseline & 46.50 & 62.39 & 64.74 \\
+GPT4o-mini ChainRAG & \textbf{50.54} & \textbf{62.55} & 64.59 \\
+Qwen2.5-72B best baseline & 44.64 & 64.19 & 60.29 \\
+Qwen2.5-72B ChainRAG & \textbf{49.37} & \textbf{65.85} & \textbf{64.54} \\
+GLM-4-Plus ChainRAG & 51.66 & \textbf{70.58} & \textbf{64.22} \\
+\bottomrule
+\end{tabular}
+}
+\end{block}
+\begin{block}{Retrieval repair}
+Rewriting sub-question 2 raises Recall@2 to 58.81 on MuSiQue and 61.83 on HotpotQA, exceeding the original second-hop retrieval.
+\end{block}
+\end{frame}

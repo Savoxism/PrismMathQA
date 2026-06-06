@@ -1,0 +1,106 @@
+\section{HGRAG}
+
+\begin{frame}{HGRAG: Metadata}
+\small
+\textbf{HGRAG: Cross-Granularity Hypergraph Retrieval-Augmented Generation}
+
+\paperinfo
+{AAAI-26 Technical Track on Natural Language Processing}
+{Retrieval encoder with dense semantic vectors; paper compares Contriever, GTR, GTE-Qwen2, and other large embedding models}
+{Llama-3 Instruct with temperature 0 for answer generation; LLM also used for entity extraction}
+{Multi-hop QA with cross-granularity entity-passage hypergraph retrieval}
+
+\begin{block}{Key insights / contributions}
+\scriptsize
+\begin{itemize}
+  \item Builds a cross-granularity hypergraph linking fine-grained entities with coarse-grained passages.
+  \item Unifies structural association and semantic relevance through hypergraph diffusion and retrieval enhancement.
+  \item Uses non-iterative retrieval to reduce latency while reporting strong retrieval and QA efficiency gains.
+\end{itemize}
+\end{block}
+\end{frame}
+
+\begin{frame}{HGRAG: Problem and Failure Mode}
+\scriptsize
+\begin{columns}[T,onlytextwidth]
+  \begin{column}{0.48\textwidth}
+    \begin{block}{Problem}
+      Multi-hop QA needs both fine entity links and coarse passage context. One granularity alone is insufficient.
+    \end{block}
+    \begin{block}{Why dense RAG fails}
+      Dense passage retrieval sees text chunks independently and may miss passages connected only through bridge entities.
+    \end{block}
+  \end{column}
+  \begin{column}{0.48\textwidth}
+    \begin{block}{Why KG GraphRAG fails}
+      Triple graphs rely heavily on fine-grained structures that can be noisy or incomplete, while underusing passage-level semantics.
+    \end{block}
+    \begin{block}{Method response}
+      HGRAG treats entities as nodes and passages as hyperedges, then diffuses query relevance through the entity-passage incidence structure.
+    \end{block}
+  \end{column}
+\end{columns}
+\end{frame}
+
+\pipelineframe{HGRAG}{images/hgrag_pipeline.png}{0.96}
+
+\begin{frame}{HGRAG: Algorithm Deep Dive}
+\scriptsize
+\begin{enumerate}
+  \item \textbf{Entity hypergraph construction:} extract entity set $E_i$ for each passage $p_i$; make $p_i$ a hyperedge connecting all entities in $E_i$.
+  \item \textbf{Semantic initialization:} compute query-to-entity scores and query-to-passage dense similarity scores.
+  \item \textbf{Hypergraph diffusion:} propagate activation across the entity-passage incidence structure so bridge entities transfer relevance to related passages.
+  \item \textbf{Semantic enhancement:} combine diffused structural scores with original dense passage scores to reduce graph noise.
+  \item \textbf{Structural enhancement:} select a dynamic-size passage set by keeping high-score passages plus structurally adjacent evidence.
+\end{enumerate}
+\begin{block}{Core intuition}
+Passages are high-order connections among entities, so retrieval can move between entity clues and passage evidence in one non-iterative pass.
+\end{block}
+\end{frame}
+
+\begin{frame}{HGRAG: Concrete Example}
+\scriptsize
+\begin{columns}[T,onlytextwidth]
+  \begin{column}{0.48\textwidth}
+    \begin{block}{Question}
+      What is the capital of the country where Albert Einstein was born?
+    \end{block}
+    \begin{block}{Evidence pieces}
+      \textbf{P1:} Albert Einstein was born in Germany.\\
+      \textbf{P2:} Germany's capital is Berlin.\\
+      \textbf{P3:} Germany is a member of the European Union.
+    \end{block}
+  \end{column}
+  \begin{column}{0.48\textwidth}
+    \begin{block}{Hypergraph retrieval path}
+      Each passage becomes a hyperedge:
+      \[
+      h_{P1}=\{\text{Einstein}, \text{Germany}\},\quad
+      h_{P2}=\{\text{Germany}, \text{Berlin}\}
+      \]
+      Diffusion uses \texttt{Germany} as the bridge from P1 to P2.
+    \end{block}
+  \end{column}
+\end{columns}
+\end{frame}
+
+\begin{frame}{HGRAG: Main Results}
+\scriptsize
+\begin{block}{QA performance on MHQA benchmarks}
+\centering
+\resizebox{0.92\linewidth}{!}{
+\begin{tabular}{lcccc}
+\toprule
+Method & MuSiQue F1 & 2Wiki F1 & HotpotQA F1 & Avg. F1 \\
+\midrule
+NV-Embed-v2 & 45.7 & 61.5 & 75.3 & 60.8 \\
+HippoRAG2 & 48.6 & 71.0 & 75.5 & 65.0 \\
+HGRAG & \textbf{53.8} & \textbf{78.3} & \textbf{76.8} & \textbf{69.6} \\
+\bottomrule
+\end{tabular}
+}
+\end{block}
+\begin{block}{Efficiency}
+On MuSiQue retrieval-time comparison: HippoRAG2 takes 86.3s for 1,000 queries, HGRAG takes 13.7s on CPU, and HGRAG on GPU takes 2.0s.
+\end{block}
+\end{frame}

@@ -1,0 +1,103 @@
+\section{EHRAG}
+
+\begin{frame}{EHRAG: Metadata}
+\small
+\textbf{EHRAG: Bridging Semantic Gaps in Lightweight GraphRAG via Hybrid Hypergraph Construction and Retrieval}
+
+\paperinfo
+{Findings of ACL 2026}
+{Lightweight NER plus entity embeddings; BIRCH clustering for semantic hyperedges; shared embedding model for fair comparison}
+{GPT-4o-mini used for LLM-Acc evaluation/generation; baselines include LLaMA3, Qwen3, GPT-3.5-turbo, GPT-4o-mini}
+{Efficient graph/hypergraph RAG for multi-hop and domain QA}
+
+\begin{block}{Key insights / contributions}
+\scriptsize
+\begin{itemize}
+  \item Identifies the semantic gap in lightweight GraphRAG caused by relying only on structural co-occurrence.
+  \item Adds hybrid structural and semantic hyperedges without expensive LLM relation extraction.
+  \item Keeps indexing scalable while improving multi-hop retrieval through hypergraph diffusion and hybrid scoring.
+\end{itemize}
+\end{block}
+\end{frame}
+
+\begin{frame}{EHRAG: Problem and Failure Mode}
+\scriptsize
+\begin{columns}[T,onlytextwidth]
+  \begin{column}{0.48\textwidth}
+    \begin{block}{Problem}
+      Lightweight GraphRAG is efficient, but sentence co-occurrence alone cannot connect semantically equivalent entities across documents.
+    \end{block}
+    \begin{block}{Why LLM-heavy GraphRAG fails}
+      LLM relation extraction is expensive and can introduce noisy triples in large or specialized corpora.
+    \end{block}
+  \end{column}
+  \begin{column}{0.48\textwidth}
+    \begin{block}{Why lightweight GraphRAG fails}
+      If "Queen" and "monarch" never co-occur, a structure-only graph may break the reasoning chain.
+    \end{block}
+    \begin{block}{Method response}
+      EHRAG adds semantic hyperedges from embedding clusters, then diffuses activation across both explicit and latent links.
+    \end{block}
+  \end{column}
+\end{columns}
+\end{frame}
+
+\pipelineframe{EHRAG}{images/ehrag_pipeline.png}{0.90}
+
+\begin{frame}{EHRAG: Algorithm Deep Dive}
+\scriptsize
+\begin{enumerate}
+  \item \textbf{Lightweight nodes:} extract entities with NER instead of LLM relation extraction.
+  \item \textbf{Structural hyperedges:} connect entities that co-occur in a sentence; this preserves cheap local evidence.
+  \item \textbf{Semantic hyperedges:} cluster entity embeddings with density-adaptive projection/BIRCH to link latent equivalents or related concepts.
+  \item \textbf{Query anchoring:} map query terms to entity nodes by embedding similarity and initialize activation scores.
+  \item \textbf{Hybrid diffusion:} propagate activation through structural and semantic hyperedges with decay.
+  \item \textbf{Passage scoring:} combine activated entities, dense passage similarity, topic relevance, and PPR refinement.
+\end{enumerate}
+\begin{block}{Core intuition}
+EHRAG keeps lightweight indexing but repairs missing semantic bridges through hyperedges over clustered entities.
+\end{block}
+\end{frame}
+
+\begin{frame}{EHRAG: Concrete Example}
+\scriptsize
+\begin{columns}[T,onlytextwidth]
+  \begin{column}{0.48\textwidth}
+    \begin{block}{Question}
+      Who was the spouse of the last Queen of the UK?
+    \end{block}
+    \begin{block}{Semantic gap}
+      Doc A mentions Elizabeth II as the last Queen. Doc B mentions Prince Philip as the husband of the monarch. A structural graph may not link Queen and monarch.
+    \end{block}
+  \end{column}
+  \begin{column}{0.48\textwidth}
+    \begin{block}{EHRAG bridge}
+      \[
+      h_{sem}=\{\text{Queen}, \text{emperor}, \text{monarch}, ...\}
+      \]
+      Query anchors activate Queen, semantic diffusion activates monarch, and retrieval reaches the spouse evidence.
+    \end{block}
+  \end{column}
+\end{columns}
+\end{frame}
+
+\begin{frame}{EHRAG: Main Results}
+\scriptsize
+\begin{block}{LLM-Acc results with GPT-4o-mini evaluator/generator}
+\centering
+\resizebox{0.95\linewidth}{!}{
+\begin{tabular}{lcccc}
+\toprule
+Method & HotpotQA & 2WikiMultiHop & MuSiQue & Medical \\
+\midrule
+HippoRAG2 & 64.30 & 55.00 & 35.00 & 60.77 \\
+LinearRAG & 66.50 & 63.70 & 37.00 & 63.72 \\
+EHRAG & \textbf{69.30} & \textbf{70.60} & \textbf{38.40} & \textbf{65.32} \\
+\bottomrule
+\end{tabular}
+}
+\end{block}
+\begin{block}{Takeaway}
+The biggest gain is on 2WikiMultiHop, where aliasing and semantically disjoint entities are common; the paper reports +6.9 LLM-Acc over LinearRAG.
+\end{block}
+\end{frame}

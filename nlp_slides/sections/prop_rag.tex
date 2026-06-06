@@ -1,0 +1,106 @@
+\section{PropRAG}
+
+\begin{frame}{PropRAG: Metadata}
+\small
+\textbf{PropRAG: Guiding Retrieval with Beam Search over Proposition Paths}
+
+\paperinfo
+{EMNLP 2025, according to paper references and title page context}
+{NV-Embed-v2 (7B) for embeddings; graph/PPR plus beam search over proposition paths}
+{Llama-3.3-70B-Instruct for offline proposition extraction and QA reader}
+{Multi-hop retrieval and QA on MuSiQue, 2WikiMultiHopQA, HotpotQA, plus NQ}
+
+\begin{block}{Key insights / contributions}
+\scriptsize
+\begin{itemize}
+  \item Uses propositions as higher-fidelity knowledge units than lossy subject-predicate-object triples.
+  \item Discovers connected evidence with LLM-free online beam search over proposition paths.
+  \item Reports strong zero-shot multi-hop retrieval and QA performance across challenging benchmarks.
+\end{itemize}
+\end{block}
+\end{frame}
+
+\begin{frame}{PropRAG: Problem and Failure Mode}
+\scriptsize
+\begin{columns}[T,onlytextwidth]
+  \begin{column}{0.48\textwidth}
+    \begin{block}{Problem}
+      Multi-hop evidence is not just a set of relevant documents; it is a coherent path connecting propositions through entities.
+    \end{block}
+    \begin{block}{Why triples fail}
+      Subject-predicate-object triples drop modifiers, conditions, provenance, and n-ary context, so later reasoning may follow the wrong entity.
+    \end{block}
+  \end{column}
+  \begin{column}{0.48\textwidth}
+    \begin{block}{Why LLM-in-loop retrieval fails}
+      Online LLM query generation can improve reasoning but increases latency, cost, and instability.
+    \end{block}
+    \begin{block}{Method response}
+      PropRAG extracts propositions offline, then performs graph-guided beam search online without LLM calls.
+    \end{block}
+  \end{column}
+\end{columns}
+\end{frame}
+
+\pipelineframe{PropRAG}{images/prop_rag_pipeline.png}{0.90}
+
+\begin{frame}{PropRAG: Algorithm Deep Dive}
+\scriptsize
+\begin{enumerate}
+  \item \textbf{Offline proposition extraction:} use an LLM to turn passages into atomic, self-contained propositions and extract their entities.
+  \item \textbf{Graph construction:} connect passages, propositions, and entities; add entity/synonym links using embedding similarity.
+  \item \textbf{Seed retrieval:} retrieve propositions semantically close to the query and collect their connected entities.
+  \item \textbf{Coarse graph pruning:} use exploratory PPR to restrict search to a relevant subgraph.
+  \item \textbf{LLM-free beam search:} expand proposition paths up to $L_{max}$; keep top beams by semantic alignment plus graph connectivity.
+  \item \textbf{Reader stage:} pass the best proposition paths and source passages to the QA LLM.
+\end{enumerate}
+\begin{block}{Core intuition}
+The online algorithm does reasoning-path discovery with graph search, not with repeated LLM calls.
+\end{block}
+\end{frame}
+
+\begin{frame}{PropRAG: Concrete Example}
+\scriptsize
+\begin{columns}[T,onlytextwidth]
+  \begin{column}{0.48\textwidth}
+    \begin{block}{Question}
+      What is the birthplace of the author of the novel about a male roe deer's life?
+    \end{block}
+    \begin{block}{Proposition graph}
+      \textbf{prop 1:} Bambi is a novel about a male roe deer.\\
+      \textbf{prop 2:} Bambi was written by Felix Salten.\\
+      \textbf{prop 3:} Felix Salten was born in Pest.
+    \end{block}
+  \end{column}
+  \begin{column}{0.48\textwidth}
+    \begin{block}{Retrieved path}
+      \[
+      \text{male roe deer novel} \rightarrow \text{Bambi} \rightarrow \text{Felix Salten} \rightarrow \text{birthplace}
+      \]
+      A proposition keeps useful context while staying smaller and cleaner than a full passage.
+    \end{block}
+  \end{column}
+\end{columns}
+\end{frame}
+
+\begin{frame}{PropRAG: Main Results}
+\scriptsize
+\begin{block}{Zero-shot QA F1 with Llama-3.3-70B-Instruct reader}
+\centering
+\resizebox{0.95\linewidth}{!}{
+\begin{tabular}{lcccc}
+\toprule
+Method & MuSiQue & 2Wiki & HotpotQA & Avg. over 5 datasets \\
+\midrule
+GraphRAG & 38.5 & 58.6 & 68.6 & 52.1 \\
+HippoRAG2 & 48.6 & 71.0 & 75.5 & 62.9 \\
+PropRAG, $L_{max}=1$ & 52.6 & 73.5 & 75.7 & 64.0 \\
+PropRAG, $L_{max}=3$ & \textbf{53.9} & \textbf{75.3} & \textbf{76.1} & \textbf{64.9} \\
+\bottomrule
+\end{tabular}
+}
+\end{block}
+\begin{block}{Takeaway}
+Propositions already help without beam search; explicit path search adds further gains, especially on multi-hop datasets.
+\end{block}
+\end{frame}

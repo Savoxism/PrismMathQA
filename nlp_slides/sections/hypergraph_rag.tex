@@ -1,0 +1,107 @@
+\section{HyperGraphRAG}
+
+\begin{frame}{HyperGraphRAG: Metadata}
+\small
+\textbf{HyperGraphRAG: Retrieval-Augmented Generation via Hypergraph-Structured Knowledge Representation}
+
+\paperinfo
+{NeurIPS 2025, 39th Conference on Neural Information Processing Systems}
+{OpenAI \texttt{text-embedding-3-small} for entities and hyperedges}
+{OpenAI GPT-4o-mini for extraction and generation}
+{Domain RAG with n-ary knowledge hypergraph retrieval}
+
+\begin{block}{Key insights / contributions}
+\scriptsize
+\begin{itemize}
+  \item First hypergraph-based RAG method for representing n-ary factual relations.
+  \item Combines knowledge hypergraph construction, hypergraph retrieval, and hypergraph-guided generation.
+  \item Improves domain QA beyond chunk-based and binary KG-based RAG baselines.
+\end{itemize}
+\end{block}
+\end{frame}
+
+\begin{frame}{HyperGraphRAG: Problem and Failure Mode}
+\scriptsize
+\begin{columns}[T,onlytextwidth]
+  \begin{column}{0.48\textwidth}
+    \begin{block}{Problem}
+      Many domain questions need one fact that binds several entities at once, e.g., patient type, lab range, diagnosis, and treatment condition.
+    \end{block}
+    \begin{block}{Why standard RAG fails}
+      Chunk retrieval scores passages independently. It may retrieve a nearby paragraph but cannot explicitly preserve which entities participate in the same clinical or legal fact.
+    \end{block}
+  \end{column}
+  \begin{column}{0.48\textwidth}
+    \begin{block}{Why binary GraphRAG fails}
+      Binary edges fragment an n-ary statement into many pairwise triples, creating sparse and incomplete evidence during retrieval.
+    \end{block}
+    \begin{block}{Method response}
+      HyperGraphRAG stores each multi-entity fact as a hyperedge, retrieves both entities and hyperedges, then fuses them with chunks for generation.
+    \end{block}
+  \end{column}
+\end{columns}
+\end{frame}
+
+\pipelineframe{HyperGraphRAG}{images/hypergraph_rag_pipeline.png}{0.98}
+
+\begin{frame}{HyperGraphRAG: Algorithm Deep Dive}
+\scriptsize
+\begin{enumerate}
+  \item \textbf{Fragment and extract:} the LLM segments documents into knowledge fragments and extracts entities plus n-ary relational descriptions.
+  \item \textbf{Store as bipartite hypergraph:} entity nodes connect to hyperedge fact nodes; entity, hyperedge, and chunk vectors are indexed separately.
+  \item \textbf{Query parsing:} the LLM extracts key entities from the question; query/entity and query/hyperedge similarities produce initial candidates.
+  \item \textbf{Hypergraph expansion:} retrieved entities pull in incident hyperedges; retrieved hyperedges expose their participant entities and source chunks.
+  \item \textbf{Knowledge fusion:} final context mixes structured n-ary facts with chunk evidence, then GPT-4o-mini generates the answer.
+\end{enumerate}
+\begin{block}{Core intuition}
+The retrieval unit is not a single passage or binary edge; it is a multi-entity fact that preserves the relation scope needed by domain questions.
+\end{block}
+\end{frame}
+
+\begin{frame}{HyperGraphRAG: Concrete Example}
+\scriptsize
+\begin{columns}[T,onlytextwidth]
+  \begin{column}{0.47\textwidth}
+    \begin{block}{Question}
+      Which treatment is suitable for a male hypertensive patient with mild serum creatinine elevation?
+    \end{block}
+    \begin{block}{Failure case}
+      A chunk may mention only the diagnosis, while binary triples split one clinical fact into weak edges:
+      \texttt{patient--has--hypertension}, \texttt{patient--has--male}, \texttt{patient--has--creatinine}.
+    \end{block}
+  \end{column}
+  \begin{column}{0.49\textwidth}
+    \begin{block}{Hypergraph view}
+      One hyperedge stores the whole n-ary fact:
+      \begin{align*}
+      e_h = \{&\text{patient}, \text{male}, \text{hypertension},\\
+              &\text{creatinine range}, \text{treatment note}\}
+      \end{align*}
+      The retriever can match any subset of entities and still recover the complete fact.
+    \end{block}
+  \end{column}
+\end{columns}
+\end{frame}
+
+\begin{frame}{HyperGraphRAG: Main Results}
+\scriptsize
+\begin{block}{Evaluation setup}
+Five domains: Medicine, Agriculture, CS, Legal, and Mix. Metrics: answer F1, retrieval similarity (R-S), and LLM-judged generation evaluation (G-E).
+\end{block}
+\centering
+\resizebox{0.96\linewidth}{!}{
+\begin{tabular}{lccc}
+\toprule
+Method & Avg. F1 & Avg. R-S & Avg. G-E \\
+\midrule
+StandardRAG & 32.96 & 51.14 & 58.85 \\
+Best binary graph baseline & 26.27 & 45.24 & 53.03 \\
+HyperGraphRAG & \textbf{38.61} & \textbf{64.25} & \textbf{61.52} \\
+\bottomrule
+\end{tabular}
+}
+\vspace{0.2cm}
+\begin{block}{Takeaway}
+The largest gain is retrieval quality: n-ary hyperedges recover more relevant gold knowledge than binary graph structures, which then improves answer accuracy and generation quality.
+\end{block}
+\end{frame}

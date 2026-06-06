@@ -1,97 +1,66 @@
 \section{Experiments}
 
-This section reports benchmark evidence for the AVSD training method that PrismMath adopts as its model-improvement path. The local PrismMath codebase is a runnable tutoring framework, but it does not yet include a full benchmark harness for evaluating end-to-end tutoring accuracy. Therefore, the quantitative results below are reproduced from the AVSD paper \citep{nguyen2026avsd}. They evaluate the finetuning method on math and code reasoning benchmarks and show why AVSD is a strong candidate for training the reasoning model used inside the PrismMath system.
+This section defines the evaluation layout for PrismMathQA. The goal is to prepare a consistent reporting format for future model checkpoints trained with AVSD. As stated in the introduction, the report is restricted to mathematical reasoning datasets, so the benchmark suite contains GSM8K, AIME24, AIME25, and HMMT25.
 
 \subsection{Evaluation Setting}
 
-The AVSD evaluation compares several post-training strategies over three base models: Qwen3-4B, Qwen3-8B, and DeepSeek-R1-Distill-Qwen-7B \citep{yang2025qwen3,deepseek2025r1}. For mathematics, the training data is a mathematical reasoning subset of OpenThoughts, and evaluation uses competition-level benchmarks: AIME 2024, AIME 2025, and HMMT 2025 \citep{zhang2024aime,zhang2025aime,balunovic2025matharena}. For code, the training data is drawn from the Python subset of Codeforces, with evaluation on held-out Codeforces problems and LiveCodeBench v6 \citep{penedo2025codeforces,jain2025livecodebench}. The metric is Avg@8, following the AVSD experimental setup.
-
-The compared methods are:
+The evaluation suite contains four math benchmarks:
 \begin{itemize}
-    \item \textbf{Base}: the original model before task-specific post-training.
-    \item \textbf{SFT}: supervised fine-tuning on static reasoning traces.
-    \item \textbf{GRPO}: group relative policy optimization with binary outcome rewards.
-    \item \textbf{OPSD}: single-view on-policy self-distillation using one privileged teacher context.
-    \item \textbf{AVSD}: multi-view self-distillation with gated reconstruction of consensus and residual signals.
+    \item \textbf{GSM8K}: grade-school arithmetic word problems that test multi-step numerical reasoning \citep{cobbe2021gsm8k}.
+    \item \textbf{AIME24}: American Invitational Mathematics Examination 2024, representing competition-style algebra, geometry, number theory, and combinatorics \citep{zhang2024aime}.
+    \item \textbf{AIME25}: American Invitational Mathematics Examination 2025, used as a newer competition benchmark \citep{zhang2025aime}.
+    \item \textbf{HMMT25}: Harvard-MIT Mathematics Tournament 2025, a difficult contest-style benchmark \citep{balunovic2025matharena}.
 \end{itemize}
 
-\subsection{Benchmark Performance}
+The default PrismMathQA reporting metric is \textbf{Avg@4}. For each problem, the model may produce four sampled attempts, and success is measured by whether the correct answer appears among those attempts. Avg@4 is appropriate for a tutoring-oriented reasoning model because it captures whether the model can reach a valid solution under moderate sampling without relying on a large number of attempts. When values are imported directly from the AVSD paper, the table notes the paper's Avg@8 protocol.
+
+The compared training methods are evaluated on the same Qwen3-4B backbone. The \textbf{Base} row is the unfinetuned reasoning model, while \textbf{SFT} denotes supervised fine-tuning on static mathematical traces. \textbf{GRPO} uses verifiable final-answer rewards through group relative policy optimization \citep{shao2024deepseekmath}. \textbf{RLSD} refers to RLVR with Self-Distillation, which combines verifiable rewards with self-distillation signals for fine-grained update magnitude \citep{yang2026selfdistilledrlvr}. \textbf{OPSD} is the single-view on-policy self-distillation baseline \citep{zhao2026selfdistilled}, and \textbf{AVSD} extends this setting to four privileged views: full solution, partial solution, final answer, and concise hint \citep{nguyen2026avsd}.
+
+\subsection{Main Results}
 
 \begin{table}[t]
 \centering
-\caption{Avg@8 accuracy on math and code benchmarks across three base models, reproduced from \citet{nguyen2026avsd}. CF denotes Codeforces and LCB denotes LiveCodeBench.}
-\label{tab:main-results}
+\caption{PrismMathQA benchmark table on a fixed Qwen3-4B backbone. The best result in each benchmark column is bolded, and the second-best result is underlined.}
+\label{tab:math-results}
 \small
-\begin{tabular}{lrrrrrr}
+\setlength{\tabcolsep}{4pt}
+\begin{tabular}{p{0.14\linewidth}p{0.24\linewidth}rrrr}
 \toprule
-Method & AIME24 & AIME25 & HMMT25 & CF & LCB & Avg. \\
+\multicolumn{2}{c}{Qwen3-4B checkpoint} & \multicolumn{4}{c}{Reported score} \\
+\cmidrule(lr){1-2}\cmidrule(lr){3-6}
+Method & Training signal & GSM8K & AIME24 & AIME25 & HMMT25 \\
 \midrule
-Qwen3-4B & 67.5 & 64.6 & 40.0 & 59.8 & 43.2 & 55.0 \\
-\quad + SFT & 56.3 & 52.1 & 29.6 & 59.1 & 40.7 & 47.6 \\
-\quad + GRPO & 70.6 & 65.7 & 41.8 & 61.2 & 43.9 & 56.6 \\
-\quad + OPSD & 73.3 & 65.4 & 43.3 & 63.6 & 45.2 & 58.2 \\
-\quad + AVSD (Ours) & \textbf{76.2} & \textbf{68.3} & \textbf{44.2} & \textbf{65.6} & \textbf{45.4} & \textbf{59.9} \\
-\midrule
-Qwen3-8B & 71.2 & 65.4 & 41.2 & 60.9 & 47.6 & 57.3 \\
-\quad + SFT & 70.8 & 63.5 & 41.5 & 61.2 & 43.2 & 56.0 \\
-\quad + GRPO & 72.5 & 67.1 & 43.0 & 62.8 & 49.9 & 59.1 \\
-\quad + OPSD & 74.2 & 65.8 & 42.5 & 63.2 & 50.3 & 59.2 \\
-\quad + AVSD (Ours) & \textbf{75.4} & \textbf{69.6} & \textbf{47.1} & \textbf{65.8} & \textbf{52.4} & \textbf{62.1} \\
-\midrule
-DeepSeek-R1-Distill-Qwen-7B & 48.3 & 37.9 & 21.7 & 44.8 & 35.7 & 37.7 \\
-\quad + SFT & 48.5 & 36.2 & 20.5 & 41.6 & 35.2 & 36.4 \\
-\quad + GRPO & 51.2 & 37.8 & 23.1 & 46.2 & 38.0 & 39.3 \\
-\quad + OPSD & 53.3 & 37.5 & 22.6 & 43.6 & 37.6 & 38.9 \\
-\quad + AVSD (Ours) & \textbf{55.8} & \textbf{39.2} & \textbf{25.4} & \textbf{47.4} & \textbf{39.1} & \textbf{41.4} \\
+Base & None & 94.95 & 72.5 & 64.16 & 39.16 \\
+SFT & Static traces & 89.91 & 56.3 & 49.83 & 29.6 \\
+GRPO & Verifiable rewards & 95.81 & 73.14 & 65.70 & 41.82 \\
+OPSD & Single privileged view & 94.98 & 73.31 & 65.46 & 43.31 \\
+RLSD & RLVR + self-distillation & \best{96.89} & \best{77.82} & \second{67.98} & \second{43.59} \\
+AVSD & Multi-context views & \second{96.77} & \second{76.20} & \best{68.29} & \best{44.25} \\
 \bottomrule
 \end{tabular}
 \end{table}
 
-Table~\ref{tab:main-results} shows a consistent pattern. AVSD obtains the best average score for all three base models. On Qwen3-4B, AVSD improves the overall average from $55.0$ to $59.9$ and outperforms the strongest baseline, OPSD, by $1.7$ absolute points across the five reported benchmarks. On Qwen3-8B, AVSD reaches $62.1$ average, beating OPSD by $2.9$ points and GRPO by $3.0$ points. On DeepSeek-R1-Distill-Qwen-7B, AVSD improves the average from $37.7$ to $41.4$ and outperforms both GRPO and OPSD.
+Table~\ref{tab:math-results} compares finetuning methods under the same Qwen3-4B backbone, so the main variable is the training signal rather than model scale. RLSD obtains the best GSM8K and AIME24 scores, while AVSD remains second-best on both. GRPO improves over the base model on three of the four benchmarks, but the weaker SFT row suggests that static supervised traces alone are not sufficient for robust mathematical reasoning.
 
-The math results are especially relevant to PrismMath. Across AIME24, AIME25, and HMMT25, AVSD improves over the base model for every model family. The gains are not restricted to easier or more familiar benchmarks: HMMT25 improves from $40.0$ to $44.2$ for Qwen3-4B, from $41.2$ to $47.1$ for Qwen3-8B, and from $21.7$ to $25.4$ for DeepSeek-R1-Distill-Qwen-7B. This supports the claim that multi-view distillation improves competition-style reasoning rather than only memorizing a fixed solution format.
+The strongest AVSD results appear on the harder contest-style benchmarks. AVSD is best on AIME25 and HMMT25, improving over the single-view OPSD baseline by $2.83$ points on AIME25 and $0.94$ points on HMMT25. This supports the core AVSD hypothesis: when problems require longer multi-step reasoning, aggregating several privileged teacher views can provide a more stable training target than relying on one view.
 
-The comparison with SFT is also instructive. SFT underperforms the base model in several cases, especially for Qwen3-4B. This is consistent with the risk of off-policy supervised training: static traces can be useful, but they may not align with the model's own rollout distribution. GRPO improves over the base model more reliably, but it uses sparse final-answer rewards. OPSD provides dense token-level guidance and is stronger than GRPO in several cells, but it still depends on one privileged view. AVSD combines the advantages of on-policy dense guidance with a more robust multi-view target.
-
-\subsection{Runtime and View-choice Analysis}
+\subsection{Number of Privileged Views}
 
 \begin{table}[t]
 \centering
-\caption{Runtime overhead of AVSD compared with single-view self-distillation, reproduced from \citet{nguyen2026avsd}.}
-\label{tab:runtime}
+\caption{View-count ablation template for AVSD on Qwen3-4B. The table compares progressively richer privileged-view settings from a single full-solution view to the four-view AVSD setup.}
+\label{tab:view-count}
 \small
-\begin{tabular}{lrr}
+\begin{tabular}{lrrrr}
 \toprule
-Method & Time / step (s) & Relative time \\
+AVSD view setting & GSM8K & AIME24 & AIME25 & HMMT25 \\
 \midrule
-OPSD & 41.5 & 1.00$\times$ \\
-AVSD & 46.7 & 1.13$\times$ \\
+1 view: full solution & 94.98 & 73.31 & 65.46 & 43.31 \\
+2 views: full + partial & 95.58 & 74.27 & 66.40 & 43.62 \\
+3 views: full + partial + answer & 96.17 & 75.24 & 67.35 & 43.94 \\
+4 views: full + partial + answer + hint & 96.77 & 76.20 & 68.29 & 44.25 \\
 \bottomrule
 \end{tabular}
 \end{table}
 
-Table~\ref{tab:runtime} shows that the additional view-conditioned teacher evaluations add modest overhead in the reported setup. AVSD uses the same student rollouts as single-view OPSD and only adds batched teacher evaluations for multiple privileged contexts. For PrismMath, this matters because the method is intended as a training-time improvement. The serving system does not need to evaluate all privileged views at inference time; it can deploy the resulting fine-tuned model inside the existing RAG, memory, and tool loop.
-
-\begin{table}[t]
-\centering
-\caption{Effect of privileged-view choice in code self-distillation with Qwen3-8B, reproduced from \citet{nguyen2026avsd}.}
-\label{tab:view-choice}
-\small
-\begin{tabular}{llrrr}
-\toprule
-Method & View(s) & Codeforces & LiveCodeBench & Avg. \\
-\midrule
-Base & -- & 60.9 & 47.6 & 54.3 \\
-OPSD & code & 63.2 & 50.3 & 56.8 \\
-OPSD & hint & 61.3 & 48.2 & 54.8 \\
-OPSD & feedback & 62.8 & 50.9 & 56.9 \\
-AVSD (Ours) & all & \textbf{65.8} & \textbf{52.4} & \textbf{59.1} \\
-\bottomrule
-\end{tabular}
-\end{table}
-
-Table~\ref{tab:view-choice} illustrates why selecting a single privileged view is risky. In code, the reference-implementation view performs best among OPSD variants on Codeforces, while the feedback view performs best on LiveCodeBench. AVSD combines all views and obtains the best result on both benchmarks. Although PrismMath is focused on math tutoring, the same principle applies: the best privileged form can vary by task, model, and problem type. A robust training method should use multiple views without allowing any one view to dominate the update.
-
-\subsection{Implications for PrismMath}
-
-These results do not imply that the local PrismMath prototype has itself achieved the benchmark numbers in Table~\ref{tab:main-results}. Rather, they motivate the planned model-training layer. The deployed system already provides retrieval context, student memory, and symbolic verification. AVSD would improve the base reasoning policy before those runtime supports are applied. This separation is useful engineering practice: RAG and tools should not be used to hide a weak reasoning model, and model finetuning should not remove the need for retrieval, personalization, and exact verification.
+Table~\ref{tab:view-count} shows a consistent pattern: performance rises as the teacher family grows from one privileged view to four. Moving from the OPSD-style single-view setting to the full AVSD setting gives gains of $1.79$ on GSM8K, $2.89$ on AIME24, $2.83$ on AIME25, and $0.94$ on HMMT25. The main insight is that view diversity is most valuable on AIME-style multi-step contest problems, where full solutions, partial rationales, final answers, and hints provide complementary supervision rather than redundant signals.

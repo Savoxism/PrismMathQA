@@ -1,4 +1,4 @@
-\begin{thebibliography}{14}
+\begin{thebibliography}{13}
 \providecommand{\natexlab}[1]{#1}
 \providecommand{\url}[1]{\texttt{#1}}
 \expandafter\ifx\csname urlstyle\endcsname\relax
@@ -22,6 +22,14 @@ Mislav Balunovic, Jasper Dekoninck, Ivo Petrov, Nikola Jovanovic, and Martin
   2025.
 \newblock URL \url{https://matharena.ai/}.
 
+\bibitem[Cobbe et~al.(2021)Cobbe, Kosaraju, Bavarian, Chen, Jun, Kaiser,
+  Plappert, Tworek, Hilton, Nakano, Hesse, and Schulman]{cobbe2021gsm8k}
+Karl Cobbe, Vineet Kosaraju, Mohammad Bavarian, Mark Chen, Heewoo Jun, Lukasz
+  Kaiser, Matthias Plappert, Jerry Tworek, Jacob Hilton, Reiichiro Nakano,
+  Christopher Hesse, and John Schulman.
+\newblock Training verifiers to solve math word problems.
+\newblock \emph{arXiv preprint arXiv:2110.14168}, 2021.
+
 \bibitem[{DeepSeek-AI}(2025)]{deepseek2025r1}
 {DeepSeek-AI}.
 \newblock {DeepSeek-R1}: Incentivizing reasoning capability in {LLMs} via
@@ -32,15 +40,6 @@ Mislav Balunovic, Jasper Dekoninck, Ivo Petrov, Nikola Jovanovic, and Martin
 Geoffrey Hinton, Oriol Vinyals, and Jeff Dean.
 \newblock Distilling the knowledge in a neural network.
 \newblock \emph{arXiv preprint arXiv:1503.02531}, 2015.
-
-\bibitem[Jain et~al.(2025)Jain, Han, Gu, Li, Yan, Zhang, Wang, Solar-Lezama,
-  Sen, and Stoica]{jain2025livecodebench}
-Naman Jain, King Han, Alex Gu, Wen-Ding Li, Fanjia Yan, Tianjun Zhang, Sida
-  Wang, Armando Solar-Lezama, Koushik Sen, and Ion Stoica.
-\newblock {LiveCodeBench}: Holistic and contamination free evaluation of large
-  language models for code.
-\newblock In \emph{International Conference on Learning Representations}, 2025.
-\newblock URL \url{https://openreview.net/forum?id=chfJJYC3iL}.
 
 \bibitem[Lewis et~al.(2020)Lewis, Perez, Piktus, Petroni, Karpukhin, Goyal,
   Kuttler, Lewis, Yih, Rockt{\"a}schel, Riedel, and Kiela]{lewis2020rag}
@@ -72,13 +71,6 @@ Duy Nguyen, Hanqi Xiao, Archiki Prasad, Zaid Khan, Anirban Das, Austin Zhang,
   teacher-specific privileged signals.
 \newblock \emph{arXiv preprint arXiv:2605.20643}, 2026.
 
-\bibitem[Penedo et~al.(2025)Penedo, Lajarin, Gallouedec, Habib, Tunstall, and
-  von Werra]{penedo2025codeforces}
-Guilherme Penedo, Agustin~Piqueres Lajarin, Quentin Gallouedec, Nathan Habib,
-  Lewis Tunstall, and Leandro von Werra.
-\newblock Codeforces, 2025.
-\newblock URL \url{https://huggingface.co/datasets/open-r1/codeforces}.
-
 \bibitem[Shao et~al.(2024)Shao, Wang, Zhu, Xu, Song, Bi, Zhang, Zhang, Li, Wu,
   and Guo]{shao2024deepseekmath}
 Zhihong Shao, Peiyi Wang, Qihao Zhu, Runxin Xu, Junxiao Song, Xiao Bi, Haowei
@@ -87,12 +79,14 @@ Zhihong Shao, Peiyi Wang, Qihao Zhu, Runxin Xu, Junxiao Song, Xiao Bi, Haowei
   language models.
 \newblock \emph{arXiv preprint arXiv:2402.03300}, 2024.
 
-\bibitem[Yang et~al.(2025)Yang, Li, Yang, Zhang, Hui, Zheng, Yu, Gao, Huang,
-  Lv, et~al.]{yang2025qwen3}
-An~Yang, Anfeng Li, Baosong Yang, Beichen Zhang, Binyuan Hui, Bo~Zheng, Bowen
-  Yu, Chang Gao, Chengen Huang, Chenxu Lv, et~al.
-\newblock {Qwen3} technical report.
-\newblock \emph{arXiv preprint arXiv:2505.09388}, 2025.
+\bibitem[Yang et~al.(2026)Yang, Qin, Si, Chen, Gu, Yao, Lin, Wang, Wang, and
+  Duan]{yang2026selfdistilledrlvr}
+Chenxu Yang, Chuanyu Qin, Qingyi Si, Minghui Chen, Naibin Gu, Dingyu Yao, Zheng
+  Lin, Weiping Wang, Jiaqi Wang, and Nan Duan.
+\newblock Self-distilled {RLVR}.
+\newblock \emph{arXiv preprint arXiv:2604.03128}, 2026.
+\newblock \doi{10.48550/arXiv.2604.03128}.
+\newblock URL \url{https://arxiv.org/abs/2604.03128}.
 
 \bibitem[Zhang and Math-AI(2024)]{zhang2024aime}
 Yifan Zhang and Team Math-AI.

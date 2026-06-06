@@ -12,10 +12,13 @@
 \usepackage{xcolor}
 \usepackage{microtype}
 
-\title{PrismMath Tutor: Agentic Retrieval-Augmented Math Tutoring with Local Student Memory and Multi-Context Self-Distillation}
+\newcommand{\best}[1]{\textbf{#1}}
+\newcommand{\second}[1]{\underline{#1}}
+
+\title{PrismMathQA: Agentic Math Tutoring with AVSD}
 
 \author{
-  Anonymous Author(s) \\
+  Group 28 \\
   NLP Capstone Project \\
   \texttt{your.email@example.com}
 }
@@ -25,14 +28,14 @@
 \maketitle
 
 \begin{abstract}
-PrismMath Tutor is an agentic mathematics tutoring system that combines retrieval-augmented generation, persistent student memory, and symbolic verification to make language-model tutoring more grounded, adaptive, and auditable. The deployed prototype exposes both a command-line interface and a FastAPI web interface. For each student, the system stores a profile and recent interactions in SQLite, retrieves similar MetaMathQA examples from a local Chroma index on the first turn, prompts an OpenAI-compatible language model with the retrieved examples and student context, and delegates exact symbolic computation to a SymPy-backed verifier when arithmetic or algebraic precision is important. This report documents the framework and positions Adaptive-View Self-Distillation (AVSD) as the finetuning method for training the reasoning model that powers the tutor. AVSD treats full solutions, partial rationales, and final answers as multiple privileged teacher views, then reconstructs token-level supervision by separating cross-view consensus from gated view-specific residual information. We reproduce the AVSD benchmark results on AIME24, AIME25, HMMT25, Codeforces, and LiveCodeBench, where AVSD improves over SFT, GRPO, and single-view on-policy self-distillation. Finally, we describe the PrismMath demonstration workflow, its current engineering limitations, and future work required to integrate a locally fine-tuned AVSD checkpoint into the full tutoring loop.
+PrismMathQA is an agentic mathematics tutoring framework that combines retrieval-augmented generation, student memory, and symbolic tool use to make LLM-based tutoring more grounded, adaptive, and reliable. The system uses a math-specialized corpus built from MetaMathQA, retrieves semantically similar examples with a Qwen3-Embedding-4B embedder and Chroma vector search, prompts an OpenAI-compatible reasoning model with retrieved examples and learner context, and delegates exact arithmetic or algebraic verification to a SymPy-backed tool when needed. This report documents the framework at a system level and positions Adaptive-View Self-Distillation (AVSD) as the finetuning method for training the reasoning model behind PrismMathQA. AVSD treats full solutions, partial rationales, final answers, and concise hints as four privileged teacher views, then reconstructs token-level supervision by separating cross-view consensus from gated view-specific residual information. The report works exclusively with mathematical reasoning datasets, preparing a benchmark table for GSM8K, AIME24, AIME25, and HMMT25 with currently available Qwen3-4B results, including RLSD and AVSD scores.
 \end{abstract}
 
 \input{sections/01_introduction}
-\input{sections/02_related_work}
-\input{sections/03_method}
+\input{sections/02_framework}
+\input{sections/03_training_method}
 \input{sections/04_experiments}
-\input{sections/05_results}
+\input{sections/05_demo}
 \input{sections/06_conclusion}
 
 \bibliographystyle{plainnat}
