@@ -216,7 +216,7 @@
   \vspace{0.12cm}
   \small
   The student rolls out from the problem only; teacher mode evaluates the same
-  prefixes under full solution, partial solution, final answer, and concise hint.
+  prefixes under full solution, partial rationale, final answer, and concise hint.
 \end{frame}
 
 \begin{frame}{Preparing Multi-view Data}
@@ -230,8 +230,8 @@
     Complete worked derivation with final answer. &
     Provides dense reasoning supervision and exposes the full mathematical structure. \\
     \midrule
-    Partial solution &
-    Initial reasoning steps or a truncated chain of thought. &
+    Partial rationale &
+    Initial reasoning steps or a truncated rationale. &
     Guides the model toward a useful start without forcing every later step to match a reference. \\
     \midrule
     Final answer &
@@ -326,9 +326,9 @@
     \begin{column}{0.45\textwidth}
       \begin{block}{Training loop}
         \begin{enumerate}\tightitems
-          \item Sample a math problem and privileged artifacts.
+          \item Sample a math problem and privileged artifacts from a MetaMathQA subset.
           \item Generate an on-policy rollout from the problem only.
-          \item Build four teacher contexts: full, partial, answer, hint.
+          \item Build four teacher contexts: full, partial rationale, answer, hint.
           \item Evaluate teacher distributions at student prefixes.
           \item Compute $q_t^G$, $q_t^A$, $J_t$, $\lambda_t$, $q_t^\star$.
           \item Minimize reverse-KL to the reconstructed target.
@@ -361,7 +361,7 @@
   \resizebox{\linewidth}{!}{
   \begin{tabular}{p{0.16\linewidth}p{0.27\linewidth}rrrr}
     \toprule
-    \multicolumn{2}{c}{Qwen3-4B checkpoint} & \multicolumn{4}{c}{Reported score} \\
+    \multicolumn{2}{c}{Qwen3-4B checkpoint} & \multicolumn{4}{c}{Reported Avg@4} \\
     \cmidrule(lr){1-2}\cmidrule(lr){3-6}
     Method & Training signal & GSM8K & AIME24 & AIME25 & HMMT25 \\
     \midrule
@@ -389,9 +389,9 @@
     AVSD view setting & GSM8K & AIME24 & AIME25 & HMMT25 \\
     \midrule
     1 view: full solution & 94.98 & 73.31 & 65.46 & 43.31 \\
-    2 views: full + partial & 95.58 & 74.27 & 66.40 & 43.62 \\
-    3 views: full + partial + answer & 96.17 & 75.24 & 67.35 & 43.94 \\
-    4 views: full + partial + answer + hint & 96.77 & 76.20 & 68.29 & 44.25 \\
+    2 views: full + partial rationale & 95.58 & 74.27 & 66.40 & 43.62 \\
+    3 views: full + partial rationale + answer & 96.17 & 75.24 & 67.35 & 43.94 \\
+    4 views: full + partial rationale + answer + hint & 96.77 & 76.20 & 68.29 & 44.25 \\
     \bottomrule
   \end{tabular}}
 

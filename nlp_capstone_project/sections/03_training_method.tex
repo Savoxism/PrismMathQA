@@ -1,7 +1,7 @@
 \section{Fine-tuning Method: Multi-context Self-Distillation}
 \label{sec:finetuning}
 
-PrismMathQA's runtime framework can improve answer grounding and verification, but it cannot by itself make the base model a better mathematical reasoner. The model still needs training signals that reward correct reasoning trajectories and discourage misleading intermediate steps. This section presents Adaptive-View Self-Distillation (AVSD) \citep{nguyen2026avsd} as the finetuning method for the model used by PrismMathQA. For this report, the finetuning data is a MetaMathQA subset whose examples provide a problem statement and solution artifacts. The method is especially well matched to a math tutor because these examples naturally come with multiple contexts: a full reference solution, a partial chain of reasoning, a final answer, and a concise hint. These contexts are useful during training but are not all available to the student model at inference time.
+PrismMathQA's runtime framework can improve answer grounding and verification, but it cannot by itself make the base model a better mathematical reasoner. The model still needs training signals that reward correct reasoning trajectories and discourage misleading intermediate steps. This section presents Adaptive-View Self-Distillation (AVSD) \citep{nguyen2026avsd} as the finetuning method for the model used by PrismMathQA. For this report, the finetuning data is a MetaMathQA subset whose examples provide a problem statement and solution artifacts. The method is especially well matched to a math tutor because these examples naturally come with multiple contexts: a full reference solution, a partial rationale, a final answer, and a concise hint. These contexts are useful during training but are not all available to the student model at inference time.
 
 Knowledge distillation is a standard way to transfer behavior from a teacher model or teacher distribution into a smaller or task-specialized student model \citep{hinton2015distilling}. In language-model post-training, distillation is attractive because it provides richer supervision than a single binary correctness label: the student can learn from token probabilities, solution traces, or preferred reasoning styles. For mathematical reasoning, this is especially useful because many errors are local. A final answer may be wrong because of one algebraic step, one sign error, or one invalid simplification; dense distillation can in principle teach the model which intermediate tokens should become more or less likely.
 
@@ -14,7 +14,7 @@ However, the classical teacher-student setup is not automatically effective for 
 \label{fig:avsd-pipeline}
 \end{figure}
 
-Figure~\ref{fig:avsd-pipeline} summarizes the training flow. The student sees only the math problem and produces a rollout. The teacher mode evaluates the same rollout under four privileged contexts: full solution, partial solution, final answer, and concise hint. The algorithm then combines these teacher distributions into a reconstructed target that preserves stable agreement while filtering view-specific signals that may be unreliable.
+Figure~\ref{fig:avsd-pipeline} summarizes the training flow. The student sees only the math problem and produces a rollout. The teacher mode evaluates the same rollout under four privileged contexts: full solution, partial rationale, final answer, and concise hint. The algorithm then combines these teacher distributions into a reconstructed target that preserves stable agreement while filtering view-specific signals that may be unreliable.
 
 \subsection{From Single-view Self-Distillation to Token Advantages}
 
@@ -117,7 +117,7 @@ View & Teacher context & Training role \\
 \midrule
 Full solution & Complete worked derivation with final answer. & Provides dense reasoning supervision and exposes the full mathematical structure of the solution. \\
 \midrule
-Partial solution & Initial reasoning steps or a truncated chain of thought. & Guides the model toward a useful start without forcing every later step to match a reference trace. \\
+Partial rationale & Initial reasoning steps or a truncated rationale. & Guides the model toward a useful start without forcing every later step to match a reference trace. \\
 \midrule
 Final answer & Gold answer without full derivation. & Supplies compact correctness information while allowing the model to search for its own explanation path. \\
 \midrule

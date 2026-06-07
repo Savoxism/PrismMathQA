@@ -12,9 +12,9 @@ The evaluation suite contains four math benchmarks:
     \item \textbf{HMMT25}: Harvard-MIT Mathematics Tournament 2025, a difficult contest-style benchmark \citep{balunovic2025matharena}.
 \end{itemize}
 
-The default PrismMathQA reporting metric is \textbf{Avg@4}. For each problem, the model may produce four sampled attempts, and success is measured by whether the correct answer appears among those attempts. Avg@4 is appropriate for a tutoring-oriented reasoning model because it captures whether the model can reach a valid solution under moderate sampling without relying on a large number of attempts. When values are imported directly from the AVSD paper, the table notes the paper's Avg@8 protocol.
+The default PrismMathQA reporting metric is \textbf{Avg@4}. For each problem, the model may produce four sampled attempts, and success is measured by whether the correct answer appears among those attempts. Avg@4 is appropriate for a tutoring-oriented reasoning model because it captures whether the model can reach a valid solution under moderate sampling without relying on a large number of attempts.
 
-The compared training methods are evaluated on the same Qwen3-4B backbone. The \textbf{Base} row is the unfinetuned reasoning model, while \textbf{SFT} denotes supervised fine-tuning on static mathematical traces. \textbf{GRPO} uses verifiable final-answer rewards through group relative policy optimization \citep{shao2024deepseekmath}. \textbf{RLSD} refers to RLVR with Self-Distillation, which combines verifiable rewards with self-distillation signals for fine-grained update magnitude \citep{yang2026selfdistilledrlvr}. \textbf{OPSD} is the single-view on-policy self-distillation baseline \citep{zhao2026selfdistilled}, and \textbf{AVSD} extends this setting to four privileged views: full solution, partial solution, final answer, and concise hint \citep{nguyen2026avsd}.
+The compared training methods are evaluated on the same Qwen3-4B backbone. The \textbf{Base} row is the unfinetuned reasoning model, while \textbf{SFT} denotes supervised fine-tuning on static mathematical traces. \textbf{GRPO} uses verifiable final-answer rewards through group relative policy optimization \citep{shao2024deepseekmath}. \textbf{RLSD} refers to RLVR with Self-Distillation, which combines verifiable rewards with self-distillation signals for fine-grained update magnitude \citep{yang2026selfdistilledrlvr}. \textbf{OPSD} is the single-view on-policy self-distillation baseline \citep{zhao2026selfdistilled}, and \textbf{AVSD} extends this setting to four privileged views: full solution, partial rationale, final answer, and concise hint \citep{nguyen2026avsd}.
 
 \subsection{Main Results}
 
@@ -26,7 +26,7 @@ The compared training methods are evaluated on the same Qwen3-4B backbone. The \
 \setlength{\tabcolsep}{4pt}
 \begin{tabular}{p{0.14\linewidth}p{0.24\linewidth}rrrr}
 \toprule
-\multicolumn{2}{c}{Qwen3-4B checkpoint} & \multicolumn{4}{c}{Reported score} \\
+\multicolumn{2}{c}{Qwen3-4B checkpoint} & \multicolumn{4}{c}{Reported Avg@4} \\
 \cmidrule(lr){1-2}\cmidrule(lr){3-6}
 Method & Training signal & GSM8K & AIME24 & AIME25 & HMMT25 \\
 \midrule
@@ -56,9 +56,9 @@ The strongest AVSD results appear on the harder contest-style benchmarks. AVSD i
 AVSD view setting & GSM8K & AIME24 & AIME25 & HMMT25 \\
 \midrule
 1 view: full solution & 94.98 & 73.31 & 65.46 & 43.31 \\
-2 views: full + partial & 95.58 & 74.27 & 66.40 & 43.62 \\
-3 views: full + partial + answer & 96.17 & 75.24 & 67.35 & 43.94 \\
-4 views: full + partial + answer + hint & 96.77 & 76.20 & 68.29 & 44.25 \\
+2 views: full + partial rationale & 95.58 & 74.27 & 66.40 & 43.62 \\
+3 views: full + partial rationale + answer & 96.17 & 75.24 & 67.35 & 43.94 \\
+4 views: full + partial rationale + answer + hint & 96.77 & 76.20 & 68.29 & 44.25 \\
 \bottomrule
 \end{tabular}
 \end{table}
