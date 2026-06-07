@@ -19,8 +19,7 @@
 
 \author{
   Group 28 \\
-  NLP Capstone Project \\
-  \texttt{your.email@example.com}
+  NLP Capstone Project
 }
 
 \begin{document}
@@ -28,7 +27,7 @@
 \maketitle
 
 \begin{abstract}
-PrismMathQA is an agentic mathematics tutoring framework that combines retrieval-augmented generation, student memory, and symbolic tool use to make LLM-based tutoring more grounded, adaptive, and reliable. The system uses a math-specialized corpus built from MetaMathQA, retrieves semantically similar examples with a Qwen3-Embedding-4B embedder and Chroma vector search, prompts an OpenAI-compatible reasoning model with retrieved examples and learner context, and delegates exact arithmetic or algebraic verification to a SymPy-backed tool when needed. This report documents the framework at a system level and positions Adaptive-View Self-Distillation (AVSD) as the finetuning method for training the reasoning model behind PrismMathQA. AVSD treats full solutions, partial rationales, final answers, and concise hints as four privileged teacher views, then reconstructs token-level supervision by separating cross-view consensus from gated view-specific residual information. The report works exclusively with mathematical reasoning datasets, preparing a benchmark table for GSM8K, AIME24, AIME25, and HMMT25 with currently available Qwen3-4B results, including RLSD and AVSD scores.
+PrismMathQA is an agentic mathematics tutoring framework that combines retrieval-augmented generation, student memory, and symbolic tool use to make LLM-based tutoring more grounded, adaptive, and reliable. The system uses a math-specialized corpus built from MetaMathQA, retrieves semantically similar examples with a Qwen3-Embedding-0.6B embedder and Chroma vector search, prompts a Qwen3-4B reasoning model finetuned with Adaptive-View Self-Distillation (AVSD) using retrieved examples and learner context, and delegates exact arithmetic or algebraic verification to a SymPy-backed tool when needed. This report documents the framework at a system level and positions AVSD as the finetuning method for training the reasoning model behind PrismMathQA. AVSD treats full solutions, partial rationales, final answers, and concise hints as four privileged teacher views, then reconstructs token-level supervision by separating cross-view consensus from gated view-specific residual information. The report focuses on mathematical reasoning datasets and reports results on reasoning benchmarks including GSM8K, AIME24, AIME25, and HMMT25.
 \end{abstract}
 
 \input{sections/01_introduction}
