@@ -5,7 +5,13 @@ from __future__ import annotations
 from dataclasses import dataclass
 
 from app.memory.store import MemoryStore, StudentProfile
-from app.prompts import SYSTEM_PROMPT, build_tool_followup_prompt, build_user_prompt
+from app.prompts import (
+    SYSTEM_PROMPT,
+    build_protocol_retry_prompt,
+    build_tool_followup_prompt,
+    build_user_prompt,
+    looks_like_incomplete_tool_intent,
+)
 from app.rag.retrieve import RAGRetriever, RetrievedExample
 from app.tools.runtime import extract_tool_request, run_tool
 from utils.llm_client import chat_completion
@@ -49,6 +55,20 @@ def run_chat_turn(
     except ValueError as exc:
         request = None
         tool_calls.append({"action": "unsupported_tool", "args": {}, "result": {"error": str(exc)}})
+
+    if request is None and looks_like_incomplete_tool_intent(answer):
+        retry_prompt = build_protocol_retry_prompt(prompt, answer)
+        answer = str(
+            chat_completion(
+                [{"role": "system", "content": SYSTEM_PROMPT}, {"role": "user", "content": retry_prompt}],
+                max_tokens=DEFAULT_MAX_TOKENS,
+            )
+        )
+        try:
+            request = extract_tool_request(answer)
+        except ValueError as exc:
+            tool_calls.append({"action": "unsupported_tool", "args": {}, "result": {"error": str(exc)}})
+            request = None
 
     if request is not None:
         result = run_tool(request)

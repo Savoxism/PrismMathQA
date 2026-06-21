@@ -5,7 +5,7 @@ from __future__ import annotations
 import argparse
 from itertools import islice
 
-from app.paths import CHROMA_DIR, RAG_COLLECTION
+from app.paths import CHROMA_DIR, METAMATH_SAMPLE_PATH, RAG_COLLECTION
 from app.rag.dataset import load_examples
 from app.rag.embedder import QwenEmbedder
 

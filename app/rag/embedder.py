@@ -20,7 +20,7 @@ class QwenEmbedder:
         if not model_dir.exists() or not any(model_dir.iterdir()):
             raise FileNotFoundError(
                 f"Missing Qwen3 embedding weights at {model_dir}. "
-                "Download Qwen/Qwen3-Embedding-4B into this project directory first."
+                "Download Qwen/Qwen3-Embedding-0.6B into this project directory first."
             )
 
         self.batch_size = batch_size

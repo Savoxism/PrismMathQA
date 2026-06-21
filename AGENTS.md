@@ -36,7 +36,7 @@ Expected local inputs:
 
 ```text
 data/processed/metamathqa_30k.jsonl
-models/qwen3-embedding-4b/
+models/qwen3-embedding-0.6b/
 .env
 ```
 
@@ -85,7 +85,7 @@ latexmk -pdf main.tex
 - `app/chat_core.py` owns one chat turn for both CLI and web UI. Put shared turn behavior there, not separately in CLI or FastAPI handlers.
 - RAG retrieval is currently intended for the first turn only. Later turns rely on SQLite-backed recent history.
 - `MemoryStore` creates tables lazily in `data/demo.sqlite3` and stores profiles, interactions, retrieved example IDs, and tool calls.
-- `QwenEmbedder` loads local weights from `models/qwen3-embedding-4b/`; do not replace this with a network download unless explicitly requested.
+- `QwenEmbedder` loads local weights from `models/qwen3-embedding-0.6b/`; do not replace this with a network download unless explicitly requested.
 - `utils/config.py` validates `LLM_API_KEY` and `LLM_BASE_URL` at import time, so importing app modules can fail without `.env`.
 - The only model tool exposed in prompts is `verify_answer`. Keep prompt/tool contracts synchronized with `app/tools/runtime.py`.
 
