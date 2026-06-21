@@ -1,14 +1,14 @@
 # Fdb version 4
-["bibtex main"] 1780765615.51894 "main.aux" "main.bbl" "main" 1780765616.95522 0
+["bibtex main"] 1782049770.10029 "main.aux" "main.bbl" "main" 1782049771.51584 0
   "./references.bib" 1780752828 4833 e2786fb059bd7893ebbbaa4f01957da5 ""
   "C:/Users/Admin/AppData/Local/Programs/MiKTeX/bibtex/bst/natbib/plainnat.bst" 1284455456 26816 ffe5423d2019860bad9f54bc402fac15 ""
-  "main.aux" 1780765616 8313 b427f400fbf25d35498254b098cfe805 "pdflatex"
+  "main.aux" 1782049771 8313 980e4eadd62117748e411888caf30f85 "pdflatex"
   (generated)
   "main.bbl"
   "main.blg"
   (rewritten before read)
-["pdflatex"] 1780765615.7108 "main.tex" "main.pdf" "main" 1780765616.95563 0
-  "C:/Users/Admin/AppData/Local/MiKTeX/fonts/map/pdftex/pdftex.map" 1780740953 103817 cc5e9c74e8eea2d32245c357344f5ab0 ""
+["pdflatex"] 1782049770.33228 "d:/Github/NLP-Capstone-Project-20252/nlp_capstone_project/main.tex" "main.pdf" "main" 1782049771.51624 0
+  "C:/Users/Admin/AppData/Local/MiKTeX/fonts/map/pdftex/pdftex.map" 1781706499 103817 cc5e9c74e8eea2d32245c357344f5ab0 ""
   "C:/Users/Admin/AppData/Local/MiKTeX/fonts/pk/ljfour/jknappen/ec/dpi600/ectt1000.pk" 1780745928 20028 a681405c291ae7bcd575c7470000fe30 ""
   "C:/Users/Admin/AppData/Local/MiKTeX/miktex/data/le/pdftex/pdflatex.fmt" 1778870020 13350272 310032091ca02a36419522bbaf6692eb ""
   "C:/Users/Admin/AppData/Local/Programs/MiKTeX/fonts/enc/dvips/base/8r.enc" 1458473887 4993 80dc9bab7f31fb78a000ccfed0e27cab ""
@@ -120,19 +120,20 @@
   "C:/Users/Admin/AppData/Local/Programs/MiKTeX/tex/latex/trimspaces/trimspaces.sty" 1253169183 1380 971a51b00a14503ddf754cab24c3f209 ""
   "C:/Users/Admin/AppData/Local/Programs/MiKTeX/tex/latex/url/url.sty" 1388490452 12796 8edb7d69a20b857904dd0ea757c14ec9 ""
   "C:/Users/Admin/AppData/Local/Programs/MiKTeX/tex/latex/xcolor/xcolor.sty" 1729265222 55384 b454dec21c2d9f45ec0b793f0995b992 ""
+  "d:/Github/NLP-Capstone-Project-20252/nlp_capstone_project/main.tex" 1780845422 1963 5d92e76da7dd4bf7d5b43bb17fe6b9c5 ""
   "imgs/avsd_pipeline.png" 1780752038 136268 e9b851663c20399f8110874261c7daea ""
   "imgs/demo.png" 1780764897 302301 382517e951321a78ec96c23343a5d73d ""
   "imgs/demo_1.png" 1780765050 164223 557e422e714d743ea6739967b2feaa69 ""
   "imgs/prism_mathqa_pipeline.png" 1780759902 1424260 85653f78eaaf410e679f10bbb9fe1582 ""
-  "main.aux" 1780765616 8313 b427f400fbf25d35498254b098cfe805 "pdflatex"
-  "main.bbl" 1780765615 5399 c482a46abe669622f613a5475130aa9e "bibtex main"
-  "main.out" 1780765616 3616 d7a2c82698b798552307c03e011b6214 "pdflatex"
-  "main.tex" 1780765499 2009 67187b51d563704b64992d3acd967861 ""
+  "main.aux" 1782049771 8313 980e4eadd62117748e411888caf30f85 "pdflatex"
+  "main.bbl" 1782049770 5399 c482a46abe669622f613a5475130aa9e "bibtex main"
+  "main.out" 1782049771 3616 d7a2c82698b798552307c03e011b6214 "pdflatex"
+  "main.tex" 1780845422 1963 5d92e76da7dd4bf7d5b43bb17fe6b9c5 ""
   "neurips_2026.sty" 1780745531 13462 818d80447f57703e59b8270885421e82 ""
-  "sections/01_introduction.tex" 1780763252 3814 8fc2aecb907c4d9e182d90cb56f6c9ae ""
-  "sections/02_framework.tex" 1780765461 13897 8a281456c0af879dfcc18d9fcb211c43 ""
-  "sections/03_training_method.tex" 1780763287 18546 99d15abaceb2987d1854c6df19e074b0 ""
-  "sections/04_experiments.tex" 1780763235 5385 b867660c137ea4e22b55d5422fcab9a1 ""
+  "sections/01_introduction.tex" 1780845422 3561 50359768f9a941e67897f61298bfd4f9 ""
+  "sections/02_framework.tex" 1780845422 14154 41ec542a5d22931889cca660684cf599 ""
+  "sections/03_training_method.tex" 1780845422 18945 fed3e41c0c4d93e4858666fa6ea1b550 ""
+  "sections/04_experiments.tex" 1780845422 5383 111927a8f4e53db410be38dc28b4ce75 ""
   "sections/05_demo.tex" 1780765416 2194 b477ab5546c17474af4470d306a47f42 ""
   "sections/06_conclusion.tex" 1780765607 959 e052f60097bf4653f47c72a94a23776b ""
   (generated)
